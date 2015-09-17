@@ -18,10 +18,14 @@ public class Client {
             System.out.println(in.readLine()); // Read one line and output it
 
             System.out.print("'\n");
+
             in.close();
         }
         catch(Exception e) {
             System.out.print("Whoops! It didn't work!\n");
         }
+
+
     }
+
 }
