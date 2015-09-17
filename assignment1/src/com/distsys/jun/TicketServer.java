@@ -27,7 +27,7 @@ public class TicketServer {
             srvr.close();
         }
         catch(Exception e) {
-            System.out.print(e.getClass().getName()+"\n");
+            System.out.print(e.getClass().getName()+"\n"+e.getMessage());
         }
     }
 }
