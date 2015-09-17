@@ -2,6 +2,8 @@ package com.distsys.jun;
 
 import java.net.*;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TicketServer {
 
@@ -9,6 +11,11 @@ public class TicketServer {
 	// write your code here
         String data = "Toobie ornaught toobie";
         try {
+            File portFile = new File("port.txt");
+            List<Integer> portList = Common.ReadPortFile(portFile);
+            for (int x : portList){
+                System.out.print(""+x+"\n");
+            }
             ServerSocket srvr = new ServerSocket(1234);
             Socket skt = srvr.accept();
             System.out.print("Server has connected!\n");
@@ -20,7 +27,7 @@ public class TicketServer {
             srvr.close();
         }
         catch(Exception e) {
-            System.out.print("Whoops! It didn't work!\n");
+            System.out.print(e.getClass().getName()+"\n");
         }
     }
 }
