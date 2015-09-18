@@ -30,21 +30,26 @@ public class TicketServer {
 
             serverClock = new LamportClock();
             MessageCreator message = new MessageCreator(serverClock);
+            Runnable serverSender = new ServerSender(serverIdx,portList);
+            new Thread(serverSender).start();
 
+            while (true) {
+                Socket clientSocket = srvr.accept();
+                System.out.print("Server has connected!\n");
+                OutputStream outputStream = clientSocket.getOutputStream();
+                InputStream inputStream = clientSocket.getInputStream();
 
+                Common.socketObjSend(message, outputStream);
+                MessageCreator reconst = (MessageCreator) Common.socketObjReceive(inputStream);
+                System.out.print("Server "+serverIdx+": "+reconst.toString());
+                Thread.sleep(2000);
+//                outputStream.close();
+//                inputStream.close();
+//                srvr.close();
 
-            Socket clientSocket = srvr.accept();
-            System.out.print("Server has connected!\n");
-            OutputStream outputStream = clientSocket.getOutputStream();
-            InputStream inputStream = clientSocket.getInputStream();
-
-            Common.socketObjSend(message, outputStream);
-            MessageCreator reconst = (MessageCreator) Common.socketObjReceive(inputStream);
-            System.out.print(reconst.toString());
-
-            outputStream.close();
-            inputStream.close();
-            srvr.close();
+                serverSender = new ServerSender(serverIdx,portList);
+                new Thread(serverSender).start();
+            }
 
 //            while (true) {
 //                Socket clientSocket = srvr.accept();
@@ -65,7 +70,7 @@ public class TicketServer {
 //
 //                Runnable requestHandler = new RequestHandler(clientSocket);
 //                new Thread(requestHandler).start();
-            srvr.close();
+//            srvr.close();
         }
         catch(Exception e) {
             System.out.print(e.getClass().getName()+"\n"+e.getMessage()+"\n");
@@ -105,6 +110,40 @@ public class TicketServer {
 
 
 
+    private static class ServerSender implements  Runnable{
+
+        private int serverIdx;
+        private ArrayList<Integer> portList;
+
+        public ServerSender(int serverIdx,ArrayList<Integer> portList){
+            this.serverIdx = serverIdx;
+            this.portList = portList;
+        }
+        @Override
+        public void run() {
+            try {
+                for (int port : portList) {
+                    if (port!=portList.get(serverIdx)) {
+                        Socket skt = new Socket("localhost", port); //random port
+                        InputStream in = skt.getInputStream();
+                        OutputStream out = skt.getOutputStream();
+                        MessageCreator message = new MessageCreator(serverClock);
+                        Common.socketObjSend(message, out);
+                        serverClock.clockInc();
+                        MessageCreator reconst = (MessageCreator) Common.socketObjReceive(in);
+                        System.out.print("server "+portList.indexOf(port)+": "+reconst.toString());
+                        in.close();
+                        out.close();
+                        skt.close();
+                    }
+                }
+            }
+            catch(Exception e) {
+                System.out.print(e.getClass().getName()+": "+e.getMessage()+"\n");
+//                e.printStackTrace(System.out);
+            }
+        }
+    }
 
     private static class RequestHandler implements Runnable{
         private final Socket clientSocket;

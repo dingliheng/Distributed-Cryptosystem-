@@ -26,7 +26,6 @@ public class Common {
     public static Object socketObjReceive(InputStream inputStream) throws IOException, ClassNotFoundException {
         Object obj;
         ObjectInputStream ois = new ObjectInputStream(inputStream);
-        System.out.print("inputstream" + "\n");
         while ((obj = ois.readObject()) == null){}
         ois.close();
 //        if (obj instanceof TicketServer.MessageCreator){
