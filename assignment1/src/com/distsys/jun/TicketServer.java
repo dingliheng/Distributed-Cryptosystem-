@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TicketServer {
-
+    public static void sfsdf(String[] args){
+    }
     public static void main(String[] args) {
-	// write your code here
-
+	// write your code her
         try {
-            File portFile = new File("port.txt");
+            File portFile = new File("port.txt");//string tokennizer
             List<Integer> portList = Common.ReadPortFile(portFile);
             for (int x : portList){
                 System.out.print(""+x+"\n");
