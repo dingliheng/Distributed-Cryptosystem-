@@ -50,25 +50,23 @@ public class TicketServer {
                 serverSender = new ServerSender(serverIdx,portList);
                 new Thread(serverSender).start();
             }*/
-
-
-            Socket clientSocket = srvr.accept();
-            System.out.print("Server has connected!\n\n");
-            OutputStream outputStream = clientSocket.getOutputStream();
-            BufferedReader in=new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            PrintWriter out = new PrintWriter(outputStream, true);
-            String lineRead;
-            while (true) {
-                while (!in.ready()) {}
-                lineRead = in.readLine();
-                System.out.println("Client:" + lineRead); // Read one line and output it
-                System.out.print("Sending string: '" + lineRead + "'\n\n");
-                //in.close();
-                //out.close();
-                //clientSocket.close();
-                out.print(lineRead+"'\n");
-                out.flush();
-           }
+                while (true) {
+                    Socket clientSocket = srvr.accept();
+                    System.out.print("\nServer has connected!\n");
+                    OutputStream outputStream = clientSocket.getOutputStream();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                    while (!in.ready()) {
+                    }
+                    String lineRead = in.readLine();
+                    System.out.println(lineRead); // Read one line and output it
+                    PrintWriter out = new PrintWriter(outputStream, true);
+                    System.out.print("Sending string: '" + lineRead + "'\n");
+                    out.print(lineRead + "'\n");
+                    out.flush();
+                    in.close();
+                    out.close();
+                    clientSocket.close();
+                }
                 //Runnable requestHandler = new RequestHandler(clientSocket);
                 //new Thread(requestHandler).start();
                 //srvr.close();
