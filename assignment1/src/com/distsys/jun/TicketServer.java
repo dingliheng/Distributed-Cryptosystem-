@@ -3,13 +3,15 @@ package com.distsys.jun;
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TicketServer {
 
     public static void main(String[] args) {
 	// write your code here
-
+        Map<Integer, String> seatMap = new HashMap<Integer, String>();
         try {
             File portFile = new File("port.txt");
             List<Integer> portList = Common.ReadPortFile(portFile);
@@ -32,7 +34,6 @@ public class TicketServer {
             System.out.print(e.getClass().getName()+"\n"+e.getMessage()+"\n");
         }
     }
-
 
 
     private static class RequestHandler implements Runnable{
@@ -64,4 +65,8 @@ public class TicketServer {
             super.finalize();
         }
     }
+
+
+
+
 }

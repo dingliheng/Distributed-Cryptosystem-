@@ -8,6 +8,7 @@ import java.util.List;
  * Created by jpan on 9/16/15.
  */
 public class Common {
+    public static final int ticketNumber = 100;
     public static List<Integer> ReadPortFile(File fin) throws IOException {
         // Construct BufferedReader from FileReader
         List<Integer> portArray = new ArrayList<Integer>();
@@ -20,4 +21,7 @@ public class Common {
         br.close();
         return portArray;
     }
+
+
+
 }
