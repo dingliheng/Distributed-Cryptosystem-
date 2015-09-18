@@ -12,14 +12,25 @@ public class Client {
             Socket skt = new Socket("localhost", 1234); //random port
             BufferedReader in = new BufferedReader(new
                     InputStreamReader(skt.getInputStream()));
-            System.out.print("Received string: '");
-
-            while (!in.ready()) {}
-            System.out.println(in.readLine()); // Read one line and output it
-            System.out.print("'\n");
+            BufferedReader sin = new BufferedReader(new InputStreamReader(System.in));
+            PrintWriter os = new PrintWriter(skt.getOutputStream());
+            String line = null; //input string from console
+            System.out.println("Please import your request");
+            line=sin.readLine();
+            while(line!="over")    {  //if import 'over'£¬break
+                os.println(line);
+                os.flush();
+                System.out.print("Received string:'");
+                while (!in.ready()) {}
+                System.out.println(in.readLine()); // Read one line and output it
+                System.out.print("\n");
+                System.out.println("Please import your request");
+                line = sin.readLine();
+            }
             in.close();
-        }
-        catch(Exception e) {
+            os.close();
+            skt.close();
+        } catch(Exception e) {
             System.out.print("Whoops! It didn't work!\n");
         }
 

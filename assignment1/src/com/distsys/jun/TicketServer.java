@@ -14,22 +14,22 @@ public class TicketServer {
     public static void main(String[] args) {
 	// write your code here
         Map<Integer, String> seatMap = new HashMap<Integer, String>();
-        try {
-            File portFile = new File("port.txt");
-            ArrayList<Integer> portList = Common.ReadPortFile(portFile);
+            try {
+                File portFile = new File("port.txt");
+                ArrayList<Integer> portList = Common.ReadPortFile(portFile);
 //            for (int x : portList){
 //                System.out.print(""+x+"\n");
 //            }
-            if (args.length < 1){
-                System.out.print("Need at least 1 argument");
-                System.exit(-1);
-            }
-            TicketServer.serverIdx = Integer.parseInt(args[0]);
-            System.out.print(portList.get(serverIdx));
-            ServerSocket srvr = new ServerSocket(portList.get(serverIdx));
+                if (args.length < 1) {
+                    System.out.print("Need at least 1 argument");
+                    System.exit(-1);
+                }
+                TicketServer.serverIdx = Integer.parseInt(args[0]);
+                System.out.println(portList.get(serverIdx));
+                ServerSocket srvr = new ServerSocket(portList.get(serverIdx));
 
-            serverClock = new LamportClock();
-            MessageCreator message = new MessageCreator(serverClock);
+                serverClock = new LamportClock();
+            /*MessageCreator message = new MessageCreator(serverClock);
             Runnable serverSender = new ServerSender(serverIdx,portList);
             new Thread(serverSender).start();
 
@@ -49,33 +49,34 @@ public class TicketServer {
 
                 serverSender = new ServerSender(serverIdx,portList);
                 new Thread(serverSender).start();
-            }
+            }*/
 
-//            while (true) {
-//                Socket clientSocket = srvr.accept();
-//                System.out.print("Server has connected!\n");
-//                OutputStream outputStream = clientSocket.getOutputStream();
-//                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-//                while (!in.ready()) {
-//                }
-//                String lineRead = in.readLine();
-//                System.out.println(in.readLine()); // Read one line and output it
-//                PrintWriter out = new PrintWriter(outputStream, true);
-//                System.out.print("Sending string: '" + lineRead + "'\n");
-//                out.print(lineRead);
-//                in.close();
-//                out.close();
-//                clientSocket.close();
-//            }
-//
-//                Runnable requestHandler = new RequestHandler(clientSocket);
-//                new Thread(requestHandler).start();
-//            srvr.close();
-        }
-        catch(Exception e) {
-            System.out.print(e.getClass().getName()+"\n"+e.getMessage()+"\n");
-            e.printStackTrace(System.out);
-        }
+
+            Socket clientSocket = srvr.accept();
+            System.out.print("Server has connected!\n\n");
+            OutputStream outputStream = clientSocket.getOutputStream();
+            BufferedReader in=new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            PrintWriter out = new PrintWriter(outputStream, true);
+            String lineRead;
+            while (true) {
+                while (!in.ready()) {}
+                lineRead = in.readLine();
+                System.out.println("Client:" + lineRead); // Read one line and output it
+                System.out.print("Sending string: '" + lineRead + "'\n\n");
+                //in.close();
+                //out.close();
+                //clientSocket.close();
+                out.print(lineRead+"'\n");
+                out.flush();
+           }
+                //Runnable requestHandler = new RequestHandler(clientSocket);
+                //new Thread(requestHandler).start();
+                //srvr.close();
+            }
+            catch(Exception e) {
+                System.out.print(e.getClass().getName()+"\n"+e.getMessage()+"\n");
+                e.printStackTrace(System.out);
+            }
     }
 
     public static class LamportClock implements Serializable{
