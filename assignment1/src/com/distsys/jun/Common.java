@@ -1,5 +1,6 @@
 package com.distsys.jun;
 
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,9 +10,9 @@ import java.util.List;
  */
 public class Common {
     public static final int ticketNumber = 100;
-    public static List<Integer> ReadPortFile(File fin) throws IOException {
+    public static ArrayList<Integer> ReadPortFile(File fin) throws IOException {
         // Construct BufferedReader from FileReader
-        List<Integer> portArray = new ArrayList<Integer>();
+        ArrayList<Integer> portArray = new ArrayList<Integer>();
         BufferedReader br = new BufferedReader(new FileReader(fin));
         String line;
         while ((line = br.readLine()) != null) {
@@ -20,6 +21,24 @@ public class Common {
         }
         br.close();
         return portArray;
+    }
+
+    public static Object socketObjReceive(InputStream inputStream) throws IOException, ClassNotFoundException {
+        Object obj;
+        ObjectInputStream ois = new ObjectInputStream(inputStream);
+        System.out.print("inputstream" + "\n");
+        while ((obj = ois.readObject()) == null){}
+        ois.close();
+//        if (obj instanceof TicketServer.MessageCreator){
+//            System.out.print("Yes\n");
+//        }
+        return obj;
+    }
+
+    public static void socketObjSend(Serializable obj, OutputStream outputStream) throws IOException {
+        ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+        oos.writeObject(obj);
+//        oos.close();
     }
 
 
