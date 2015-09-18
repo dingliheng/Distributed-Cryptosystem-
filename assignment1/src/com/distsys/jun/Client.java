@@ -9,15 +9,15 @@ package com.distsys.jun;
 public class Client {
     public static void main(String args[]) {
         try {
-            Socket skt = new Socket("localhost", 1234); //random port
-            BufferedReader in = new BufferedReader(new
-                    InputStreamReader(skt.getInputStream()));
             BufferedReader sin = new BufferedReader(new InputStreamReader(System.in));
-            PrintWriter os = new PrintWriter(skt.getOutputStream());
-            String line = null; //input string from console
             System.out.println("Please import your request");
+            String line = null; //input string from console
             line=sin.readLine();
             while(line!="over")    {  //if import 'over'£¬break
+                Socket skt = new Socket("localhost", 1234); //random port
+                BufferedReader in = new BufferedReader(new
+                        InputStreamReader(skt.getInputStream()));
+                PrintWriter os = new PrintWriter(skt.getOutputStream());
                 os.println(line);
                 os.flush();
                 System.out.print("Received string:'");
@@ -25,11 +25,11 @@ public class Client {
                 System.out.println(in.readLine()); // Read one line and output it
                 System.out.print("\n");
                 System.out.println("Please import your request");
-                line = sin.readLine();
+                line=sin.readLine();
+                in.close();
+                os.close();
+                skt.close();
             }
-            in.close();
-            os.close();
-            skt.close();
         } catch(Exception e) {
             System.out.print("Whoops! It didn't work!\n");
         }

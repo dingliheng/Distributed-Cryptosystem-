@@ -55,8 +55,7 @@ public class TicketServer {
                     System.out.print("\nServer has connected!\n");
                     OutputStream outputStream = clientSocket.getOutputStream();
                     BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                    while (!in.ready()) {
-                    }
+                    while (!in.ready()) {}
                     String lineRead = in.readLine();
                     System.out.println(lineRead); // Read one line and output it
                     PrintWriter out = new PrintWriter(outputStream, true);
