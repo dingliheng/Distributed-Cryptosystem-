@@ -28,7 +28,8 @@ public class Common {
         ObjectInputStream ois = new ObjectInputStream(inputStream);
         while ((obj = ois.readObject()) == null){}
         ois.close();
-//        if (obj instanceof TicketServer.MessageCreator){
+//        TicketServer.MessageClosure message = (TicketServer.MessageClosure) obj;
+//        if (message.getMyType() == TicketServer.RequestCSMessage.class){
 //            System.out.print("Yes\n");
 //        }
         return obj;
@@ -41,5 +42,34 @@ public class Common {
     }
 
 
+    public static class MessageClosure<T extends Serializable> implements Serializable{
+        private TicketServer.LamportClock timestamp;
+        private T object;
+        private final Class<T> type;
 
+        public Class<T> getMyType() {
+            return this.type;
+        }
+
+        MessageClosure(TicketServer.LamportClock lamportClock, T object){
+            this.timestamp = lamportClock;
+            this.object = object;
+            this.type = (Class<T>) object.getClass();
+        }
+
+        @Override
+        public String toString(){
+            String outstr = "Clock: "+timestamp.getClockValue()+"\n"
+                                +"Object: "+object.toString();
+            return outstr;
+        }
+
+        public TicketServer.LamportClock getTimestamp() {
+            return timestamp;
+        }
+
+        public T getObject() {
+            return object;
+        }
+    }
 }

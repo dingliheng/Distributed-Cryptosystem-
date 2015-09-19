@@ -3,7 +3,7 @@ import java.util.*;
 /**
  * Created by Liheng on 2015/9/18.
  */
-public class seat {
+public class Seat {
     public Map<Integer, String> num_name = new HashMap<Integer, String>();
     public int c;
     public int seats_reserved;
@@ -11,12 +11,13 @@ public class seat {
     public int name_seats_reserved;
     public ArrayList<Integer> seat_number = new ArrayList();
 
-    public seat(int total){
+    public Seat(int total){
         for(int i=0;i<total;i++){
             c = total;
             num_name.put(i,"");
         }
     }
+
 
     public  String reserve(String name,int count) {
         seats_reserved = 0;
@@ -96,7 +97,7 @@ public class seat {
     }
     
     public static void main(String[] args) {
-        seat a = new seat(15);
+        Seat a = new Seat(15);
         System.out.println(a.num_name);
         System.out.println(a.reserve("bob", 20));
         System.out.println(a.num_name);
@@ -118,4 +119,5 @@ public class seat {
         System.out.println(a.reserve("amy", 2));
         System.out.println(a.num_name);
     }
+
 }
