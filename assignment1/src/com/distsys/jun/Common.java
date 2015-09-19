@@ -1,9 +1,12 @@
 package com.distsys.jun;
 
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Created by jpan on 9/16/15.
@@ -57,16 +60,27 @@ public class Common {
             this.type = (Class<T>) object.getClass();
         }
 
-        MessageClosure(TicketServer.LamportClock lamportClock, T object){
+        MessageClosure(int serverId, TicketServer.LamportClock lamportClock, T object){
             this.timestamp = lamportClock;
             this.object = object;
             this.type = (Class<T>) object.getClass();
         }
 
         @Override
+        public int hashCode() {
+            return timestamp.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            MessageClosure mc = (MessageClosure)obj;
+            return timestamp == mc.timestamp;
+        }
+
+        @Override
         public String toString(){
             String outstr = "Clock: "+timestamp.getClockValue()
-                                +", "+object.toString();
+                                +", server: "+timestamp.getServerId()+", "+object.toString();
             return outstr;
         }
 

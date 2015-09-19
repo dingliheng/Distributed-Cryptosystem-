@@ -1,5 +1,7 @@
 package com.distsys.jun;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import javax.naming.directory.SearchControls;
 import java.net.*;
 import java.io.*;
@@ -13,7 +15,6 @@ public class TicketServer {
     private static Seat seat;
     public static void main(String[] args) {
 	// write your code here
-        serverClock = new LamportClock();
         seat = new Seat(ticketNumber);
         try {
             File portFile = new File("port.txt");
@@ -28,45 +29,46 @@ public class TicketServer {
             TicketServer.serverIdx = Integer.parseInt(args[0]);
             ServerSocket srvr = new ServerSocket(portList.get(serverIdx));
             System.out.println("Server "+serverIdx+" Port "+ portList.get(serverIdx) +" socket opened");
+            serverClock = new LamportClock(serverIdx);
 
-//            RequestCSMessage requestCSMessage = new RequestCSMessage(serverIdx, RequestType.READ);
-//            MessageClosure message = new MessageClosure(serverClock, requestCSMessage);
-//            Runnable serverSender = new ServerSender(serverIdx,portList);
-//            new Thread(serverSender).start();
-//
-//            while (true) {
-//                Socket clientSocket = srvr.accept();
-////                System.out.print("Server has connected!\n");
-//                OutputStream outputStream = clientSocket.getOutputStream();
-//                InputStream inputStream = clientSocket.getInputStream();
-//
-//                socketObjSend(message, outputStream);
-//                MessageClosure reconst = (MessageClosure) socketObjReceive(inputStream);
-//                System.out.print("Server "+serverIdx+": "+reconst.toString());
-//                Thread.sleep(2000);
-////                outputStream.close();
-////                inputStream.close();
-////                srvr.close();
-//
-//                serverSender = new ServerSender(serverIdx,portList);
-//                new Thread(serverSender).start();
-//            }
+            RequestCSMessage requestCSMessage = new RequestCSMessage(RequestType.READ);
+            MessageClosure message = new MessageClosure(serverIdx, serverClock, requestCSMessage);
+            Runnable serverSender = new ServerSender(serverIdx,portList);
+            new Thread(serverSender).start();
+
             while (true) {
                 Socket clientSocket = srvr.accept();
-                System.out.print("\nServer has connected!\n");
+//                System.out.print("Server has connected!\n");
                 OutputStream outputStream = clientSocket.getOutputStream();
-                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                while (!in.ready()) {}
-                String lineRead = in.readLine();
-                System.out.println(lineRead); // Read one line and output it
-                PrintWriter out = new PrintWriter(outputStream, true);
-                System.out.print("Sending string: '" + lineRead + "'\n");
-                out.print(lineRead + "'\n");
-                out.flush();
-                in.close();
-                out.close();
-                clientSocket.close();
+                InputStream inputStream = clientSocket.getInputStream();
+
+                socketObjSend(message, outputStream);
+                MessageClosure reconst = (MessageClosure) socketObjReceive(inputStream);
+                System.out.print("Server "+serverIdx+": "+reconst.toString());
+                Thread.sleep(2000);
+//                outputStream.close();
+//                inputStream.close();
+//                srvr.close();
+
+                serverSender = new ServerSender(serverIdx,portList);
+                new Thread(serverSender).start();
             }
+//            while (true) {
+//                Socket clientSocket = srvr.accept();
+//                System.out.print("\nServer has connected!\n");
+//                OutputStream outputStream = clientSocket.getOutputStream();
+//                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//                while (!in.ready()) {}
+//                String lineRead = in.readLine();
+//                System.out.println(lineRead); // Read one line and output it
+//                PrintWriter out = new PrintWriter(outputStream, true);
+//                System.out.print("Sending string: '" + lineRead + "'\n");
+//                out.print(lineRead + "'\n");
+//                out.flush();
+//                in.close();
+//                out.close();
+//                clientSocket.close();
+//            }
                 //Runnable requestHandler = new RequestHandler(clientSocket);
                 //new Thread(requestHandler).start();
                 //srvr.close();
@@ -79,10 +81,17 @@ public class TicketServer {
 
     public static class LamportClock implements Serializable{
         private int clockValue;
+        private int serverId;
 
         LamportClock(){
             clockValue = 0;
+            serverId = -1;
         }
+
+        LamportClock(int serverId){
+            this.serverId = serverId;
+        }
+
         public void clockInc(){
             clockValue += 1;
         }
@@ -93,6 +102,23 @@ public class TicketServer {
         public int getClockValue() {
             return clockValue;
         }
+
+        public int getServerId() {
+            return serverId;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return clockValue == ((LamportClock)obj).clockValue && serverId == ((LamportClock)obj).serverId;
+        }
+
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder(17, 37)
+                    .append(clockValue)
+                    .append(serverId)
+                    .toHashCode();
+        }
     }
 
     private enum RequestType{
@@ -101,29 +127,25 @@ public class TicketServer {
     }
 
     public static class RequestCSMessage implements Serializable{
-        private int serverId;
         private RequestType type;
 
-        public RequestCSMessage(int serverId, RequestType type) {
-            this.serverId = serverId;
+        public RequestCSMessage(RequestType type) {
             this.type = type;
         }
 
         @Override
         public String toString() {
-            return "RequestCSMessage("+serverId+","+type.name()+")\n";
+            return "RequestCSMessage("+type.name()+")\n";
         }
     }
 
     public static class Ackmessage implements Serializable{
-        private int serverId;
-        public Ackmessage(int serverId){
-            this.serverId = serverId;
+        public Ackmessage(){
         }
 
         @Override
         public String toString() {
-            return "Ack from server "+serverId+"\n";
+            return "Ack from server\n";
         }
     }
 
@@ -145,8 +167,8 @@ public class TicketServer {
                         Socket skt = new Socket("localhost", port); //random port
                         InputStream in = skt.getInputStream();
                         OutputStream out = skt.getOutputStream();
-                        RequestCSMessage requestCSMessage = new RequestCSMessage(serverIdx, RequestType.WRITE);
-                        MessageClosure message = new MessageClosure(serverClock, requestCSMessage);
+                        RequestCSMessage requestCSMessage = new RequestCSMessage(RequestType.WRITE);
+                        MessageClosure message = new MessageClosure(serverIdx, serverClock, requestCSMessage);
                         socketObjSend(message, out);
                         serverClock.clockInc();
                         MessageClosure reconst = (MessageClosure) socketObjReceive(in);
