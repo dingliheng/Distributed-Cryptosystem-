@@ -13,7 +13,7 @@ public class Client {
             System.out.println("Please import your request");
             String line = null; //input string from console
             line=sin.readLine();
-            while(line!="over")    {  //if import 'over'£¬break
+            while(line!="over")    {  //if import 'over' break
                 Socket skt = new Socket("localhost", 1234); //random port
                 BufferedReader in = new BufferedReader(new
                         InputStreamReader(skt.getInputStream()));

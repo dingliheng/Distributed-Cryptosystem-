@@ -1,5 +1,6 @@
 package com.distsys.jun;
 
+import javax.naming.directory.SearchControls;
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -9,10 +10,12 @@ public class TicketServer {
 
     private static int serverIdx;
     private static LamportClock serverClock;
-
+    private static Seat seat;
     public static void main(String[] args) {
 	// write your code here
+
         try {
+            seat = new Seat(ticketNumber);
             File portFile = new File("port.txt");
             ArrayList<Integer> portList = ReadPortFile(portFile);
 //            for (int x : portList){
@@ -27,44 +30,44 @@ public class TicketServer {
             ServerSocket srvr = new ServerSocket(portList.get(serverIdx));
 
             serverClock = new LamportClock();
-            RequestCSMessage requestCSMessage = new RequestCSMessage(serverIdx, RequestType.READ);
-            MessageClosure message = new MessageClosure(serverClock, requestCSMessage);
-            Runnable serverSender = new ServerSender(serverIdx,portList);
-            new Thread(serverSender).start();
-
+//            RequestCSMessage requestCSMessage = new RequestCSMessage(serverIdx, RequestType.READ);
+//            MessageClosure message = new MessageClosure(serverClock, requestCSMessage);
+//            Runnable serverSender = new ServerSender(serverIdx,portList);
+//            new Thread(serverSender).start();
+//
+//            while (true) {
+//                Socket clientSocket = srvr.accept();
+////                System.out.print("Server has connected!\n");
+//                OutputStream outputStream = clientSocket.getOutputStream();
+//                InputStream inputStream = clientSocket.getInputStream();
+//
+//                socketObjSend(message, outputStream);
+//                MessageClosure reconst = (MessageClosure) socketObjReceive(inputStream);
+//                System.out.print("Server "+serverIdx+": "+reconst.toString());
+//                Thread.sleep(2000);
+////                outputStream.close();
+////                inputStream.close();
+////                srvr.close();
+//
+//                serverSender = new ServerSender(serverIdx,portList);
+//                new Thread(serverSender).start();
+//            }
             while (true) {
                 Socket clientSocket = srvr.accept();
-//                System.out.print("Server has connected!\n");
+                System.out.print("\nServer has connected!\n");
                 OutputStream outputStream = clientSocket.getOutputStream();
-                InputStream inputStream = clientSocket.getInputStream();
-
-                socketObjSend(message, outputStream);
-                MessageClosure reconst = (MessageClosure) socketObjReceive(inputStream);
-                System.out.print("Server "+serverIdx+": "+reconst.toString());
-                Thread.sleep(2000);
-//                outputStream.close();
-//                inputStream.close();
-//                srvr.close();
-
-                serverSender = new ServerSender(serverIdx,portList);
-                new Thread(serverSender).start();
+                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                while (!in.ready()) {}
+                String lineRead = in.readLine();
+                System.out.println(lineRead); // Read one line and output it
+                PrintWriter out = new PrintWriter(outputStream, true);
+                System.out.print("Sending string: '" + lineRead + "'\n");
+                out.print(lineRead + "'\n");
+                out.flush();
+                in.close();
+                out.close();
+                clientSocket.close();
             }
-//                while (true) {
-//                    Socket clientSocket = srvr.accept();
-//                    System.out.print("\nServer has connected!\n");
-//                    OutputStream outputStream = clientSocket.getOutputStream();
-//                    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-//                    while (!in.ready()) {}
-//                    String lineRead = in.readLine();
-//                    System.out.println(lineRead); // Read one line and output it
-//                    PrintWriter out = new PrintWriter(outputStream, true);
-//                    System.out.print("Sending string: '" + lineRead + "'\n");
-//                    out.print(lineRead + "'\n");
-//                    out.flush();
-//                    in.close();
-//                    out.close();
-//                    clientSocket.close();
-//                }
                 //Runnable requestHandler = new RequestHandler(clientSocket);
                 //new Thread(requestHandler).start();
                 //srvr.close();

@@ -44,11 +44,17 @@ public class Common {
 
     public static class MessageClosure<T extends Serializable> implements Serializable{
         private TicketServer.LamportClock timestamp;
-        private T object;
+        private final T object;
         private final Class<T> type;
 
         public Class<T> getMyType() {
             return this.type;
+        }
+
+        MessageClosure(T object){
+            this.timestamp = new TicketServer.LamportClock();
+            this.object = object;
+            this.type = (Class<T>) object.getClass();
         }
 
         MessageClosure(TicketServer.LamportClock lamportClock, T object){

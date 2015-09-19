@@ -19,7 +19,7 @@ public class Seat {
     }
 
 
-    public  String reserve(String name,int count) {
+    public synchronized String reserve(String name,int count) {
         seats_reserved = 0;
         for (int i = 0; i < c; i++) {
             if (num_name.get(i) != "") {
@@ -57,7 +57,7 @@ public class Seat {
         return message_to_client;
     }
 
-    public String search(String name){
+    public synchronized String search(String name){
         name_seats_reserved = 0;
         seat_number.clear();
         for (int i = 0; i < c; i++) {
@@ -75,7 +75,7 @@ public class Seat {
         }
     }
 
-    public String delete(String name){
+    public synchronized String delete(String name){
         name_seats_reserved = 0;
         seats_reserved = 0;
         for (int i = 0; i < c; i++) {
