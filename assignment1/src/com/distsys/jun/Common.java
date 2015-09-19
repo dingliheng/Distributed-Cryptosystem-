@@ -65,8 +65,8 @@ public class Common {
 
         @Override
         public String toString(){
-            String outstr = "Clock: "+timestamp.getClockValue()+"\n"
-                                +"Object: "+object.toString();
+            String outstr = "Clock: "+timestamp.getClockValue()
+                                +", "+object.toString();
             return outstr;
         }
 

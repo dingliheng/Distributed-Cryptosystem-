@@ -13,9 +13,9 @@ public class TicketServer {
     private static Seat seat;
     public static void main(String[] args) {
 	// write your code here
-
+        serverClock = new LamportClock();
+        seat = new Seat(ticketNumber);
         try {
-            seat = new Seat(ticketNumber);
             File portFile = new File("port.txt");
             ArrayList<Integer> portList = ReadPortFile(portFile);
 //            for (int x : portList){
@@ -26,10 +26,9 @@ public class TicketServer {
                 System.exit(-1);
             }
             TicketServer.serverIdx = Integer.parseInt(args[0]);
-            System.out.println(portList.get(serverIdx));
             ServerSocket srvr = new ServerSocket(portList.get(serverIdx));
+            System.out.println("Server "+serverIdx+" Port "+ portList.get(serverIdx) +" socket opened");
 
-            serverClock = new LamportClock();
 //            RequestCSMessage requestCSMessage = new RequestCSMessage(serverIdx, RequestType.READ);
 //            MessageClosure message = new MessageClosure(serverClock, requestCSMessage);
 //            Runnable serverSender = new ServerSender(serverIdx,portList);
@@ -116,7 +115,17 @@ public class TicketServer {
         }
     }
 
+    public static class Ackmessage implements Serializable{
+        private int serverId;
+        public Ackmessage(int serverId){
+            this.serverId = serverId;
+        }
 
+        @Override
+        public String toString() {
+            return "Ack from server "+serverId+"\n";
+        }
+    }
 
 
     private static class ServerSender implements  Runnable{

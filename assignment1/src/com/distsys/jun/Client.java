@@ -6,6 +6,9 @@ package com.distsys.jun;
 /**
  * Created by jpan on 9/17/15.
  */
+//TODO encapsulate message to message closure
+//TODO Create class to parse client command and perform seat operation
+
 public class Client {
     public static void main(String args[]) {
         try {
