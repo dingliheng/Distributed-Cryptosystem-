@@ -30,7 +30,7 @@ public class Common {
         Object obj;
         ObjectInputStream ois = new ObjectInputStream(inputStream);
         while ((obj = ois.readObject()) == null){}
-        ois.close();
+//        ois.close();
 //        TicketServer.MessageClosure message = (TicketServer.MessageClosure) obj;
 //        if (message.getMyType() == TicketServer.RequestCSMessage.class){
 //            System.out.print("Yes\n");
