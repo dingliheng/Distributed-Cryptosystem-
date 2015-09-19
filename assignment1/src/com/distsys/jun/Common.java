@@ -60,7 +60,7 @@ public class Common {
             this.type = (Class<T>) object.getClass();
         }
 
-        MessageClosure(int serverId, TicketServer.LamportClock lamportClock, T object){
+        MessageClosure(TicketServer.LamportClock lamportClock, T object){
             this.timestamp = lamportClock;
             this.object = object;
             this.type = (Class<T>) object.getClass();
@@ -80,7 +80,7 @@ public class Common {
         @Override
         public String toString(){
             String outstr = "Clock: "+timestamp.getClockValue()
-                                +", server: "+timestamp.getServerId()+", "+object.toString();
+                                +",from server: "+timestamp.getServerId()+", "+object.toString();
             return outstr;
         }
 

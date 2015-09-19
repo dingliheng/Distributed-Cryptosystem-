@@ -1,5 +1,6 @@
 package com.distsys.jun;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import javax.naming.directory.SearchControls;
@@ -32,7 +33,7 @@ public class TicketServer {
             serverClock = new LamportClock(serverIdx);
 
             RequestCSMessage requestCSMessage = new RequestCSMessage(RequestType.READ);
-            MessageClosure message = new MessageClosure(serverIdx, serverClock, requestCSMessage);
+            MessageClosure message = new MessageClosure(serverClock, requestCSMessage);
             Runnable serverSender = new ServerSender(serverIdx,portList);
             new Thread(serverSender).start();
 
@@ -44,7 +45,7 @@ public class TicketServer {
 
                 socketObjSend(message, outputStream);
                 MessageClosure reconst = (MessageClosure) socketObjReceive(inputStream);
-                System.out.print("Server "+serverIdx+": "+reconst.toString());
+                System.out.print(reconst.toString());
                 Thread.sleep(2000);
 //                outputStream.close();
 //                inputStream.close();
@@ -83,6 +84,11 @@ public class TicketServer {
         private int clockValue;
         private int serverId;
 
+        @Override
+        public String toString() {
+            return "server "+serverId+" clock "+clockValue;
+        }
+
         LamportClock(){
             clockValue = 0;
             serverId = -1;
@@ -92,10 +98,10 @@ public class TicketServer {
             this.serverId = serverId;
         }
 
-        public void clockInc(){
+        public synchronized void clockInc(){
             clockValue += 1;
         }
-        public void clockInc(LamportClock lamportClock){
+        public synchronized void clockInc(LamportClock lamportClock){
             this.clockValue = Math.max(this.clockValue, lamportClock.clockValue)+1;
         }
 
@@ -139,13 +145,31 @@ public class TicketServer {
         }
     }
 
-    public static class Ackmessage implements Serializable{
-        public Ackmessage(){
+    public static class AckMessage implements Serializable{
+        public AckMessage(){
         }
 
         @Override
         public String toString() {
-            return "Ack from server\n";
+            return "Ack\n";
+        }
+    }
+
+    public static class ReleaseMesage implements Serializable{
+        private final LamportClock entry;
+        private final RequestCSMessage request;
+        public ReleaseMesage(LamportClock uniqueEntry, RequestCSMessage request) {
+            this.entry = uniqueEntry;
+            this.request = request;
+        }
+
+        public ReleaseMesage(LamportClock uniqueEntry) {
+            this.entry = uniqueEntry;
+            this.request = null;
+        }
+
+        public String toString() {
+            return "Release "+entry.toString()+ " request is " + ObjectUtils.toString(request,"no info")+"\n";
         }
     }
 
@@ -168,11 +192,12 @@ public class TicketServer {
                         InputStream in = skt.getInputStream();
                         OutputStream out = skt.getOutputStream();
                         RequestCSMessage requestCSMessage = new RequestCSMessage(RequestType.WRITE);
-                        MessageClosure message = new MessageClosure(serverIdx, serverClock, requestCSMessage);
+                        ReleaseMesage releaseMessage = new ReleaseMesage(serverClock, requestCSMessage);
+                        MessageClosure message = new MessageClosure(serverClock, releaseMessage);
                         socketObjSend(message, out);
                         serverClock.clockInc();
                         MessageClosure reconst = (MessageClosure) socketObjReceive(in);
-                        System.out.print("server "+portList.indexOf(port)+": "+reconst.toString());
+                        System.out.print(reconst.toString());
                         in.close();
                         out.close();
                         skt.close();
