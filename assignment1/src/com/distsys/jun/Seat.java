@@ -22,7 +22,7 @@ public class Seat {
     public synchronized String reserve(String name,int count) {
         seats_reserved = 0;
         for (int i = 0; i < c; i++) {
-            if (num_name.get(i) != "") {
+            if (!num_name.get(i).equals("")) {
                 seats_reserved++;
             }
         }
@@ -33,7 +33,7 @@ public class Seat {
         name_seats_reserved = 0;
         seat_number.clear();
         for (int i = 0; i < c; i++) {
-            if (num_name.get(i) == name) {
+            if (num_name.get(i).equals(name)) {
                 name_seats_reserved++;
                 seat_number.add(i);
             }
@@ -44,7 +44,7 @@ public class Seat {
         }
         for (int i = 0; i < c; i++) {
             if(name_seats_reserved<count) {
-                if (num_name.get(i) == "") {
+                if (num_name.get(i).equals("")) {
                     num_name.put(i,name);
                     name_seats_reserved++;
                     seat_number.add(i);
@@ -61,7 +61,7 @@ public class Seat {
         name_seats_reserved = 0;
         seat_number.clear();
         for (int i = 0; i < c; i++) {
-            if (num_name.get(i) == name) {
+            if (num_name.get(i).equals(name)) {
                 name_seats_reserved++;
                 seat_number.add(i);
             }
@@ -79,10 +79,10 @@ public class Seat {
         name_seats_reserved = 0;
         seats_reserved = 0;
         for (int i = 0; i < c; i++) {
-            if(num_name.get(i) != ""){
+            if(!num_name.get(i).equals("")){
                 seats_reserved++;
             }
-            if (num_name.get(i) == name) {
+            if (num_name.get(i).equals(name)) {
                 name_seats_reserved++;
                 num_name.put(i,"");
             }
@@ -95,28 +95,14 @@ public class Seat {
             return  message_to_client;
         }
     }
-    
+
     public static void main(String[] args) {
         Seat a = new Seat(15);
         System.out.println(a.num_name);
-        System.out.println(a.reserve("bob", 20));
-        System.out.println(a.num_name);
-        System.out.println(a.reserve("bob", 5));
-        System.out.println(a.num_name);
-        System.out.println(a.reserve("bob", 5));
-        System.out.println(a.num_name);
-        System.out.println(a.search("bob"));
-        System.out.println(a.num_name);
-        System.out.println(a.search("Amy"));
-        System.out.println(a.num_name);
+        System.out.println(a.reserve("bob", 1));
+        System.out.println(a.reserve("amy", 3));
         System.out.println(a.delete("bob"));
-        System.out.println(a.num_name);
-        System.out.println(a.delete("Amy"));
-        System.out.println(a.num_name);
-        System.out.println(a.reserve("candy", 1));
-        System.out.println(a.reserve("bob", 3));
-        System.out.println(a.delete("candy"));
-        System.out.println(a.reserve("amy", 2));
+        System.out.println(a.reserve("candy",3));
         System.out.println(a.num_name);
     }
 
