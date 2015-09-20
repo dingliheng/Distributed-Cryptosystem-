@@ -16,6 +16,7 @@ public class TicketProcessor {
     public String name;
     public int count;
     public TicketServer.RequestType type;
+    public String messageTOclient;
     public TicketProcessor(String clientrequest) {
         StringTokenizer strT1 = new StringTokenizer(clientrequest," ");
         int n = strT1.countTokens(); // the number of elements in clientrequest
@@ -31,16 +32,17 @@ public class TicketProcessor {
             type = TicketServer.RequestType.READ;
         }
     }
-    public void execute(Seat seat) {
+    public String execute(Seat seat) {
         if(request.equals("reserve")){
-            seat.reserve(name,count);
+            messageTOclient = seat.reserve(name,count);
         }
         if(request.equals("search")){
-            seat.search(name);
+            messageTOclient = seat.search(name);
         }
         if(request.equals("delete")){
-            seat.delete(name);
+            messageTOclient = seat.delete(name);
         }
+        return messageTOclient;
     }
     public static void main(String args[]){
         TicketProcessor a = new TicketProcessor("asdf sdf 5");
