@@ -74,7 +74,7 @@ public class Common {
         @Override
         public boolean equals(Object obj) {
             MessageClosure mc = (MessageClosure)obj;
-            return timestamp == mc.timestamp;
+            return timestamp.equals(mc.timestamp);
         }
 
         @Override
