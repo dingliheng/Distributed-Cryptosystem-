@@ -64,6 +64,7 @@ public class Client {
             } catch(Exception e) {
                 System.out.print(e.getClass().getName()+"\n"+e.getMessage()+"\n");
                 e.printStackTrace(System.out);
+                System.out.println("Woops, the server has crashed");
             }
         }
 

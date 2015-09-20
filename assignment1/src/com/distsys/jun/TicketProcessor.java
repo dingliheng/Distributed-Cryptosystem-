@@ -2,10 +2,7 @@ package com.distsys.jun;
 
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.StringTokenizer;
+import java.util.*;
 
 import static com.distsys.jun.Common.*;
 /**
@@ -16,7 +13,7 @@ public class TicketProcessor {
     public String name;
     public int count;
     public TicketServer.RequestType type;
-    public String messageTOclient;
+    public MessageTOclient messageTOclient;
     public TicketProcessor(String clientrequest) {
         StringTokenizer strT1 = new StringTokenizer(clientrequest," ");
         int n = strT1.countTokens(); // the number of elements in clientrequest
@@ -32,17 +29,34 @@ public class TicketProcessor {
             type = TicketServer.RequestType.READ;
         }
     }
-    public String execute(Seat seat) {
+    public MessageTOclient execute(Seat seat) {
+        Map<Integer, String> num_nameBefore = new HashMap<Integer, String>();
+        num_nameBefore = seat.num_name;
         if(request.equals("reserve")){
-            messageTOclient = seat.reserve(name,count);
+            messageTOclient.message = seat.reserve(name, count);
+            if(num_nameBefore.equals(seat.num_name)){
+                messageTOclient.change = false;
+            }else{
+                messageTOclient.change = true;
+            }
         }
         if(request.equals("search")){
-            messageTOclient = seat.search(name);
+            messageTOclient.message = seat.search(name);
+            messageTOclient.change = true;
         }
         if(request.equals("delete")){
-            messageTOclient = seat.delete(name);
+            messageTOclient.message = seat.delete(name);
+            if(num_nameBefore.equals(seat.num_name)){
+                messageTOclient.change = false;
+            }else{
+                messageTOclient.change = true;
+            }
         }
         return messageTOclient;
+    }
+    public class MessageTOclient{
+        String message;
+        boolean change;
     }
     public static void main(String args[]){
         TicketProcessor a = new TicketProcessor("asdf sdf 5");
