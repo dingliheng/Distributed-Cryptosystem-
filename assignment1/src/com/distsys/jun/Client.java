@@ -30,12 +30,13 @@ public class Client {
                     int random_port = new Random().nextInt(n);
                     System.out.println("try to connect to server: "+ random_port);
                     Socket skt = new Socket("localhost", portList.get(random_port)); //random port
+                    System.out.println("connected");
 //                    Socket skt = new Socket("localhost", 1234); //random port
                     StringTokenizer strT1 = new StringTokenizer(line," ");
                     int count = strT1.countTokens(); // the number of elements in clientrequest
                     request = strT1.nextToken();
                     if ((!request.equals("reserve"))&&(!request.equals("delete"))&&(!request.equals("search"))){
-                        System.out.println("illegal import,Please import again");
+                        System.out.println("illegal input,Please import again");
                         line=sin.readLine();
                         continue;
                     }
@@ -64,8 +65,8 @@ public class Client {
                     skt.close();
                 }
             } catch(Exception e) {
-                System.out.print(e.getClass().getName()+"\n"+e.getMessage()+"\n");
-                e.printStackTrace(System.out);
+                System.out.print(e.getClass().getName()+": "+e.getMessage()+"\n");
+//                e.printStackTrace(System.out);
                 System.out.println("Woops, the server has crashed");
             }
         }
