@@ -64,9 +64,6 @@ public class TicketProcessor {
         }
     }
     public static void main(String args[]){
-        TicketProcessor a = new TicketProcessor("asdf sdf 5");
-        System.out.println(a.count);
-        System.out.println(a.name);
-        System.out.println(a.request);
+
     }
 }

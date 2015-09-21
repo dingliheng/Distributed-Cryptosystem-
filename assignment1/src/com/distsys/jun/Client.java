@@ -22,12 +22,12 @@ public class Client {
             String line; //input string from console
             line=sin.readLine();
             String request;
+            boolean connected; //when connected successfully, true; if nor, false
             File portFile = new File("port.txt");
             ArrayList<Integer> portList = ReadPortFile(portFile);
-            int n = portList.size();
+            int random_port = 0;
             while (true) {
                 try {
-                    boolean connected;
                     while(line!="over") {  //if import 'over' break
                         StringTokenizer strT1 = new StringTokenizer(line, " ");
                         int count = strT1.countTokens(); // the number of elements in clientrequest
@@ -37,12 +37,18 @@ public class Client {
                             line = sin.readLine();
                             continue;
                         }
-                        int random_port = new Random().nextInt(n);
-                        System.out.println("try to connect to server: "+ random_port);
-                        long startMili=System.currentTimeMillis();// 当前时间对应的毫秒数
+                        int n = portList.size();
+                        if (n==0){
+                            portList = ReadPortFile(portFile);
+                            n = portList.size();
+                        }
+                        random_port = new Random().nextInt(n);
+                        System.out.println("try to connect to server: "+ portList.get(random_port));
+                        long startMili=System.currentTimeMillis();
                         while((System.currentTimeMillis()-startMili)<5000){
                             try{
-                                Socket skt = new Socket("localhost", portList.get(random_port)); //random port
+                                Socket skt = new Socket("localhost", portList.get(random_port));
+                                System.out.println("connect successfully");
                                 connected = true;
                                 break;
                             }catch (Exception e){
@@ -54,6 +60,7 @@ public class Client {
 //                    Socket skt = new Socket("localhost", 1234); //random port}
                         if (connected = true){
                             Socket skt = new Socket("localhost", portList.get(random_port));
+
                             InputStream in = skt.getInputStream();
                             OutputStream out = skt.getOutputStream();
                             //                PrintWriter os = new PrintWriter(skt.getOutputStream());
@@ -79,9 +86,10 @@ public class Client {
                         }
                     }
                 } catch(Exception e) {
-                    System.out.print(e.getClass().getName()+"\n"+e.getMessage()+"\n");
+                    System.out.print(e.getClass().getName() + "\n" + e.getMessage() + "\n");
                     e.printStackTrace(System.out);
                     System.out.println("Woops, the server has crashed");
+                    portList.remove(random_port);
                 }
             }
         }catch (Exception e){
