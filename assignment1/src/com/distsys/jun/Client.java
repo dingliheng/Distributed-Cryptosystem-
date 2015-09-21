@@ -28,7 +28,9 @@ public class Client {
                 int n = portList.size();
                 while(line!="over")    {  //if import 'over' break
                     int random_port = new Random().nextInt(n);
-                    Socket skt = new Socket("localhost", 1234); //random port
+                    System.out.println("try to connect to server: "+ random_port);
+                    Socket skt = new Socket("localhost", portList.get(random_port)); //random port
+//                    Socket skt = new Socket("localhost", 1234); //random port
                     StringTokenizer strT1 = new StringTokenizer(line," ");
                     int count = strT1.countTokens(); // the number of elements in clientrequest
                     request = strT1.nextToken();

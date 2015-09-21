@@ -13,7 +13,7 @@ public class TicketProcessor {
     public String name;
     public int count;
     public TicketServer.RequestType type;
-    public MessageTOclient messageTOclient;
+    public MessageTOclient messageTOclient = new MessageTOclient();
     public TicketProcessor(String clientrequest) {
         StringTokenizer strT1 = new StringTokenizer(clientrequest," ");
         int n = strT1.countTokens(); // the number of elements in clientrequest
@@ -30,8 +30,8 @@ public class TicketProcessor {
         }
     }
     public MessageTOclient execute(Seat seat) {
-        Map<Integer, String> num_nameBefore = new HashMap<Integer, String>();
-        num_nameBefore = seat.num_name;
+        Map<Integer, String> num_nameBefore = new HashMap<Integer, String>(seat.num_name);
+//        num_nameBefore = seat.num_name;
         if(request.equals("reserve")){
             messageTOclient.message = seat.reserve(name, count);
             if(num_nameBefore.equals(seat.num_name)){
@@ -54,9 +54,14 @@ public class TicketProcessor {
         }
         return messageTOclient;
     }
-    public class MessageTOclient{
+    public static class MessageTOclient{
         String message;
         boolean change;
+
+        public MessageTOclient() {
+            this.message = "";
+            this.change = false;
+        }
     }
     public static void main(String args[]){
         TicketProcessor a = new TicketProcessor("asdf sdf 5");

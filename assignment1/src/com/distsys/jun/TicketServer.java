@@ -1,18 +1,11 @@
 package com.distsys.jun;
-
-import com.sun.xml.internal.ws.handler.ServerMessageHandlerTube;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import javax.naming.directory.SearchControls;
 import java.net.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.*;
+import java.util.concurrent.*;
 
 import static com.distsys.jun.Common.*;
 
@@ -25,6 +18,7 @@ public class TicketServer {
     private static LinkedBlockingQueue<RequestPackage> serverMessageQueue;
     private static PriorityBlockingQueue<MessageClosure> readRequestQueue;
     private static PriorityBlockingQueue<MessageClosure> writeRequestQueue;
+    private static ArrayList<Integer> portList;
 
     public static Comparator<MessageClosure> lamportClockComparator = new Comparator<MessageClosure>(){
         @Override
@@ -43,7 +37,7 @@ public class TicketServer {
         seat = new Seat(ticketNumber);
         try {
             File portFile = new File("port.txt");
-            ArrayList<Integer> portList = ReadPortFile(portFile);
+            portList = ReadPortFile(portFile);
             if (args.length < 1) {
                 System.out.print("Need at least 1 argument");
                 System.exit(-1);
@@ -63,28 +57,6 @@ public class TicketServer {
             Runnable serverRequestHandler = new ServerRequestHandler();
             new Thread(serverRequestHandler).start();
 
-//            RequestCSMessage requestCSMessage = new RequestCSMessage(RequestType.READ);
-//            MessageClosure message = new MessageClosure(serverClock, requestCSMessage);
-//            Runnable serverSender = new ServerSender(serverIdx,portList);
-//            new Thread(serverSender).start();
-//
-//            while (true) {
-//                Socket clientSocket = srvr.accept();
-////                System.out.print("Server has connected!\n");
-//                OutputStream outputStream = clientSocket.getOutputStream();
-//                InputStream inputStream = clientSocket.getInputStream();
-//
-//                socketObjSend(message, outputStream);
-//                MessageClosure reconst = (MessageClosure) socketObjReceive(inputStream);
-//                System.out.print(reconst.toString());
-//                Thread.sleep(2000);
-////                outputStream.close();
-////                inputStream.close();
-////                srvr.close();
-//
-//                serverSender = new ServerSender(serverIdx,portList);
-//                new Thread(serverSender).start();
-//            }
             while (true) {
                 Socket clientSocket = srvr.accept();
                 System.out.print("\nServer has connected!\n");
@@ -101,9 +73,7 @@ public class TicketServer {
 //                outputStream.close();
 //                clientSocket.close();
             }
-                //Runnable requestHandler = new RequestHandler(clientSocket);
-                //new Thread(requestHandler).start();
-                //srvr.close();
+
         }
         catch(Exception e) {
             System.out.print(e.getClass().getName()+"\n"+e.getMessage()+"\n");
@@ -146,7 +116,7 @@ public class TicketServer {
 
         @Override
         public boolean equals(Object obj) {
-            return clockValue == ((LamportClock)obj).clockValue && serverId == ((LamportClock)obj).serverId;
+            return (clockValue == ((LamportClock)obj).clockValue) && (serverId == ((LamportClock)obj).serverId);
         }
 
         @Override
@@ -205,42 +175,89 @@ public class TicketServer {
     }
 
 
-    private static class ServerSender implements  Runnable{
-
-        private int serverIdx;
-        private ArrayList<Integer> portList;
-
-        public ServerSender(int serverIdx,ArrayList<Integer> portList){
-            this.serverIdx = serverIdx;
-            this.portList = portList;
+    private static class ServerCSRequester implements Callable<Boolean>{
+        private final int port;
+        private final MessageClosure<RequestCSMessage> message;
+        public ServerCSRequester(int port, MessageClosure<RequestCSMessage> message){
+            this.port = port;
+            this.message = message;
         }
+
         @Override
-        public void run() {
+        public Boolean call() {
             try {
-                for (int port : portList) {
-                    if (port!=portList.get(serverIdx)) {
-                        Socket skt = new Socket("localhost", port); //random port
-                        InputStream in = skt.getInputStream();
-                        OutputStream out = skt.getOutputStream();
-                        RequestCSMessage requestCSMessage = new RequestCSMessage(RequestType.WRITE);
-//                        ReleaseMesage releaseMessage = new ReleaseMesage(requestCSMessage);
-//                        MessageClosure message = new MessageClosure(serverClock, releaseMessage);
-//                        socketObjSend(message, out);
-//                        serverClock.clockInc();
-                        MessageClosure reconst = (MessageClosure) socketObjReceive(in);
-                        System.out.print(reconst.toString());
-                        in.close();
-                        out.close();
-                        skt.close();
-                    }
+                Socket skt = new Socket("localhost", port);
+                InputStream in = skt.getInputStream();
+                OutputStream out = skt.getOutputStream();
+//                RequestCSMessage thisRequestCSMessage = new RequestCSMessage(type);
+//                MessageClosure<RequestCSMessage> requestMessageClosure = new MessageClosure<>(serverClock, thisRequestCSMessage);
+                socketObjSend(message, out);
+                out.flush();
+                MessageClosure messageClosure = (MessageClosure) socketObjReceive(in);
+                if (messageClosure.getMyType() != AckMessage.class){
+                    System.out.println("ServerCSRequester: expect to receive ack");
                 }
+                out.close();
+                in.close();
+                skt.close();
+                return true;
             }
             catch(Exception e) {
-                System.out.print(e.getClass().getName()+": "+e.getMessage()+"\n");
-//                e.printStackTrace(System.out);
+                System.out.println("exception when requesting from port "+port+": "+ e.getClass().getName()+": "+e.getMessage());
+                return false;
             }
         }
     }
+
+    private static class ServerRelease implements Runnable{
+        private final int port;
+        private final MessageClosure<ReleaseMesage> message;
+        public ServerRelease(int port, MessageClosure<ReleaseMesage> message){
+            this.port = port;
+            this.message = message;
+        }
+        @Override
+        public void run() {
+            try{
+                Socket skt = new Socket("localhost", port);
+//                InputStream in = skt.getInputStream();
+                OutputStream out = skt.getOutputStream();
+                socketObjSend(message, out);
+                out.flush();
+                out.close();
+//                in.close();
+                skt.close();
+            }catch (Exception e){
+                System.out.println("exception when release to port "+port+": "+ e.getClass().getName()+": "+e.getMessage());
+            }
+
+        }
+    }
+
+    private static class ServerUpdate implements Runnable{
+        private final int port;
+        private final MessageClosure<HashMap> message;
+        public ServerUpdate(int port, MessageClosure<HashMap> message) {
+            this.port = port;
+            this.message = message;
+        }
+        @Override
+        public void run() {
+            try{
+                Socket skt = new Socket("localhost", port);
+//                InputStream in = skt.getInputStream();
+                OutputStream out = skt.getOutputStream();
+                socketObjSend(message, out);
+                out.flush();
+                out.close();
+//                in.close();
+                skt.close();
+            }catch (Exception e){
+                System.out.println("exception when send map update to port "+port+": "+ e.getClass().getName()+": "+e.getMessage());
+            }
+        }
+    }
+
 
     private static class ServerRequestHandler implements Runnable{
         @Override
@@ -252,7 +269,7 @@ public class TicketServer {
                     MessageClosure messageClosure = requestPackage.messageClosure;
                     OutputStream out = socket.getOutputStream();
                     InputStream in = socket.getInputStream();
-                    System.out.print("Receive from server: "+messageClosure.toString());
+                    System.out.print("Receive from server: " + messageClosure.toString());
 
                     if (messageClosure.getMyType() == AckMessage.class){
                         System.out.println("ServerRequestHandler: can't receive ack");
@@ -271,6 +288,10 @@ public class TicketServer {
                             default:
                                 System.out.println("ServerRequestHandler: unknown CS type request received");
                         }
+                        MessageClosure<AckMessage> ackMessageClosure = new MessageClosure<>(serverClock,new AckMessage());
+                        socketObjSend(ackMessageClosure,out);
+                        out.flush();
+
                     } else if (messageClosure.getMyType() == ReleaseMesage.class) {
                         ReleaseMesage releaseMesage = (ReleaseMesage)messageClosure.getObject();
                         RequestCSMessage messageToBeDel = releaseMesage.request.getObject();
@@ -282,13 +303,18 @@ public class TicketServer {
                                 break;
                             case WRITE:
                                 MessageClosure removedRequest = writeRequestQueue.poll();
+                                if (removedRequest == null) {
+                                    System.out.println("ServerRequestHandler: before release write queue is empty? ");
+                                }
                                 if (!removedRequest.equals(releaseMesage.request)){
                                     System.out.println("ServerRequestHandler: released write request is not the smallest!");
+
                                 }
                                 break;
                             default:
                                 System.out.println("ServerRequestHandler: unknown CS type request to be deleted");
                         }
+                        System.out.println(releaseMesage.toString());
 
                     } else if (messageClosure.getMyType() == HashMap.class){
                         seat.num_name = (HashMap)messageClosure.getObject();
@@ -297,12 +323,11 @@ public class TicketServer {
                     }
 
 
-                    out.flush();
                     out.close();
                     in.close();
                     socket.close();
 
-
+                    System.out.println("\nComplete Server request: " + requestPackage.toString());
 
                 }
             }
@@ -314,6 +339,15 @@ public class TicketServer {
         }
     }
     private static class ClientRequestHandler implements Runnable{
+        private Callable<Void> toCallable(final Runnable runnable) {
+            return new Callable<Void>() {
+                @Override
+                public Void call() {
+                    runnable.run();
+                    return null;
+                }
+            };
+        }
         @Override
         public void run() {
             try {
@@ -323,13 +357,93 @@ public class TicketServer {
                     MessageClosure messageClosure = requestPackage.messageClosure;
                     OutputStream out = socket.getOutputStream();
                     InputStream in = socket.getInputStream();
-                    socketObjSend(messageClosure, out);
+                    TicketProcessor ticketProcessor = new TicketProcessor((String)messageClosure.getObject());
+
+                    List<ServerCSRequester> requestList = new ArrayList<ServerCSRequester>();
+                    RequestCSMessage thisRequestCSMessage = new RequestCSMessage(ticketProcessor.type);
+                    MessageClosure<RequestCSMessage> requestMessageClosure = new MessageClosure<>(serverClock, thisRequestCSMessage);
+                    for (int port : portList){
+                        if (port != portList.get(serverIdx)) {
+                            requestList.add(new ServerCSRequester(port, requestMessageClosure));
+                        }
+                    }
+                    if (requestList.size() >0) {
+                        ExecutorService taskRequestCSExecutor = Executors.newFixedThreadPool(requestList.size());
+                        List<Future<Boolean>> results = taskRequestCSExecutor.invokeAll(requestList, 5, TimeUnit.SECONDS);
+                        taskRequestCSExecutor.shutdown();
+                        for (Future<Boolean> result : results) {
+                            try {
+                                if (result.get() != true) {
+                                    System.out.println("CS request meet exception when requesting from port");
+                                }
+                            } catch (CancellationException e) {
+                                System.out.println("CS request cancelled: " + e.getClass().getName() + ": " + e.getMessage());
+                            } catch (Exception e) {
+                                System.out.println("CS request unknown exception: " + e.getClass().getName() + ": " + e.getMessage());
+                            }
+
+                        }
+                    }
+                    if (ticketProcessor.type == RequestType.READ){
+                        readRequestQueue.offer(requestMessageClosure);
+                    } else if (ticketProcessor.type == RequestType.WRITE){
+                        writeRequestQueue.offer(requestMessageClosure);
+                    }
+                    serverClock.clockInc();
+                    TicketProcessor.MessageTOclient messageTOclient = new TicketProcessor.MessageTOclient();
+                    if (ticketProcessor.type == RequestType.READ){
+                        if (writeRequestQueue.size()>0) {
+                            while(requestMessageClosure.isGreater(writeRequestQueue.peek()));
+                        }
+                        messageTOclient = ticketProcessor.execute(seat);
+                    } else if (ticketProcessor.type == RequestType.WRITE){
+                        if (readRequestQueue.size() >0) {
+                            while(requestMessageClosure.isGreater(writeRequestQueue.peek()) || requestMessageClosure.isGreater(readRequestQueue.peek()));
+                        }
+                        messageTOclient = ticketProcessor.execute(seat);
+                    }
+
+                    if (messageTOclient.change == true) {
+                        MessageClosure<HashMap> updateMesageClosure = new MessageClosure<HashMap>(serverClock, (HashMap) seat.num_name);
+                        List<Callable<Void>> updateList = new ArrayList<>();
+                        for (int port : portList) {
+                            if (port != portList.get(serverIdx)) {
+                                updateList.add(toCallable(new ServerUpdate(port, updateMesageClosure)));
+                            }
+                        }
+                        ExecutorService taskUpdateExecutor = Executors.newFixedThreadPool(updateList.size());
+                        taskUpdateExecutor.invokeAll(updateList, 5, TimeUnit.SECONDS);
+                        taskUpdateExecutor.shutdown();
+                    }
+
+
+                    MessageClosure<ReleaseMesage> releaseMesageClosure = new MessageClosure<ReleaseMesage>(new ReleaseMesage(requestMessageClosure));
+                    List<Callable<Void>> releaseList = new ArrayList<>();
+                    for (int port: portList){
+                        if (port != portList.get(serverIdx)) {
+                            releaseList.add(toCallable(new ServerRelease(port, releaseMesageClosure)));
+                        }
+                    }
+                    ExecutorService taskReleaseExecutor = Executors.newFixedThreadPool(releaseList.size());
+                    taskReleaseExecutor.invokeAll(releaseList, 5, TimeUnit.SECONDS);
+                    taskReleaseExecutor.shutdown();
+                    if (ticketProcessor.type == RequestType.READ){
+                        if (!requestMessageClosure.equals(readRequestQueue.poll())){
+                            System.out.println("Self read queue release is not smallest");
+                        }
+                    } else if (ticketProcessor.type == RequestType.WRITE){
+                        if (!requestMessageClosure.equals(writeRequestQueue.poll())){
+                            System.out.println("Self write queue release is not smallest");
+                        }
+                    }
+                    socketObjSend(new MessageClosure<String>(messageTOclient.message), out);
+
                     out.flush();
                     out.close();
                     in.close();
                     socket.close();
+                    System.out.println("Complete Client request: " + requestPackage.toString());
 //                    System.out.print(messageClosure.toString());
-
                 }
             }
             catch(Exception e) {

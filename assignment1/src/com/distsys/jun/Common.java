@@ -88,6 +88,18 @@ public class Common {
             return timestamp;
         }
 
+        public boolean isGreater(MessageClosure<T> other){
+            if (this.equals(other)) return false;
+            if (this.getTimestamp().getClockValue() > other.getTimestamp().getClockValue()) {
+                return true;
+            } else if (this.getTimestamp().getClockValue() == other.getTimestamp().getClockValue()){
+                if (this.getTimestamp().getServerId() > this.getTimestamp().getServerId()){
+                    return true ;
+                }
+            }
+            return false;
+        }
+
         public T getObject() {
             return object;
         }

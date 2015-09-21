@@ -79,12 +79,12 @@ public class Seat {
         name_seats_reserved = 0;
         seats_reserved = 0;
         for (int i = 0; i < c; i++) {
-            if(!num_name.get(i).equals("")){
-                seats_reserved++;
-            }
             if (num_name.get(i).equals(name)) {
                 name_seats_reserved++;
                 num_name.put(i,"");
+            }
+            if(!num_name.get(i).equals("")){
+                seats_reserved++;
             }
         }
         if(name_seats_reserved == 0){

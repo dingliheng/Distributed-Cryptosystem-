@@ -1,4 +1,5 @@
-JFLAGS = -Xlint:unchecked 
+# JFLAGS = -Xlint:unchecked 
+JFLAGS =  
 JC = javac
 JAR = apache-commons-lang.jar 
 # JAR = 
