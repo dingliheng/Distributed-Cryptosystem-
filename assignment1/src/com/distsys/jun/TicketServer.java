@@ -47,16 +47,16 @@ public class TicketServer {
         try {
             File portFile = new File("port.txt");
             portList = ReadPortFile(portFile);
-//            if (args.length < 1) {
-//                System.err.print("Need at least 1 argument");
-//                System.exit(-1);
-//            }
-            BufferedReader sin = new BufferedReader(new InputStreamReader(System.in));
-            System.out.println("Please input server index");
-            String line=sin.readLine();
-            sin.close();
-            TicketServer.serverIdx = Integer.parseInt(line.trim());
-//            TicketServer.serverIdx = Integer.parseInt(args[0]);
+            if (args.length < 1) {
+                System.err.print("Need at least 1 argument");
+                System.exit(-1);
+            }
+//            BufferedReader sin = new BufferedReader(new InputStreamReader(System.in));
+//            System.out.println("Please input server index");
+//            String line=sin.readLine();
+//            sin.close();
+//            TicketServer.serverIdx = Integer.parseInt(line.trim());
+            TicketServer.serverIdx = Integer.parseInt(args[0]);
 
             boolean needUpdate = false;
             MessageClosure<RecoverRequestMessage> recoverRequestMessageClosure = new MessageClosure<>(new RecoverRequestMessage());
