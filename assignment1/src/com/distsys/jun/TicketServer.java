@@ -18,8 +18,8 @@ public class TicketServer {
     private static Seat seat;
     private static LinkedBlockingQueue<RequestPackage> clientMessageQueue;
     private static LinkedBlockingQueue<RequestPackage> serverMessageQueue;
-    private static PriorityBlockingQueue<MessageClosure<RequestCSMessage>> readRequestQueue;
-    private static PriorityBlockingQueue<MessageClosure<RequestCSMessage>> writeRequestQueue;
+    private static PriorityBlockingQueue<MessageClosure> readRequestQueue;
+    private static PriorityBlockingQueue<MessageClosure> writeRequestQueue;
     private static LinkedBlockingQueue<RequestPackage> recoverMessageQueue;
     private static ArrayList<Integer> portList;
     private static AtomicBoolean cslock;
@@ -91,15 +91,17 @@ public class TicketServer {
                 System.out.println("I am updating from Server: "+maxRecoverMessage.lamportClock.getServerId());
                 serverClock = new LamportClock(serverIdx, maxRecoverMessage.lamportClock.getClockValue());
                 seat.num_name = maxRecoverMessage.seatMap;
-//                readRequestQueue = maxRecoverMessage.readRequestQueue;
-//                writeRequestQueue = maxRecoverMessage.writeRequestQueue;
-                readRequestQueue = new PriorityBlockingQueue<MessageClosure<RequestCSMessage>>(portList.size() * 10, lamportClockComparator);
-                writeRequestQueue = new PriorityBlockingQueue<MessageClosure<RequestCSMessage>>(portList.size() * 10, lamportClockComparator);
+//                readRequestQueue = new PriorityBlockingQueue<> (maxRecoverMessage.readRequestQueue);
+//                writeRequestQueue = new PriorityBlockingQueue<> (maxRecoverMessage.writeRequestQueue);
+                readRequestQueue = new PriorityBlockingQueue<>(portList.size() * 10, lamportClockComparator);
+                writeRequestQueue = new PriorityBlockingQueue<>(portList.size() * 10, lamportClockComparator);
+                readRequestQueue.addAll(maxRecoverMessage.readRequestQueue);
+                writeRequestQueue.addAll(maxRecoverMessage.writeRequestQueue);
             }else {
                 System.out.println("I am the only server now");
                 serverClock = new LamportClock(serverIdx);
-                readRequestQueue = new PriorityBlockingQueue<MessageClosure<RequestCSMessage>>(portList.size() * 10, lamportClockComparator);
-                writeRequestQueue = new PriorityBlockingQueue<MessageClosure<RequestCSMessage>>(portList.size() * 10, lamportClockComparator);
+                readRequestQueue = new PriorityBlockingQueue<>(portList.size() * 10, lamportClockComparator);
+                writeRequestQueue = new PriorityBlockingQueue<>(portList.size() * 10, lamportClockComparator);
             }
 
             ServerSocket srvr = new ServerSocket(portList.get(serverIdx));
@@ -271,14 +273,14 @@ public class TicketServer {
     public static class RecoverMessage implements Serializable{
         public final LamportClock lamportClock;
         public final HashMap<Integer, String> seatMap;
-        public transient final PriorityBlockingQueue<MessageClosure<RequestCSMessage>> readRequestQueue;
-        public transient final PriorityBlockingQueue<MessageClosure<RequestCSMessage>> writeRequestQueue;
+        public final PriorityQueue<MessageClosure> readRequestQueue;
+        public final PriorityQueue<MessageClosure> writeRequestQueue;
 
-        public RecoverMessage(LamportClock lamportClock, HashMap<Integer, String> seatMap, PriorityBlockingQueue<MessageClosure<RequestCSMessage>> readRequestQueue, PriorityBlockingQueue<MessageClosure<RequestCSMessage>> writeRequestQueue) {
+        public RecoverMessage(LamportClock lamportClock, HashMap<Integer, String> seatMap, PriorityBlockingQueue<MessageClosure> readRequestQueue, PriorityBlockingQueue<MessageClosure> writeRequestQueue) {
             this.lamportClock = lamportClock;
             this.seatMap = seatMap;
-            this.readRequestQueue = readRequestQueue;
-            this.writeRequestQueue = writeRequestQueue;
+            this.readRequestQueue = new PriorityQueue<>(readRequestQueue);
+            this.writeRequestQueue =new PriorityQueue<>(writeRequestQueue);
         }
 
         public static RecoverMessage maxClock(RecoverMessage first, RecoverMessage second){
@@ -306,7 +308,7 @@ public class TicketServer {
         private final int port;
         private final MessageClosure<RecoverRequestMessage> message ;
 
-        public ServerRecoverRequester(int port, MessageClosure<RecoverRequestMessage> message) {
+        public ServerRecoverRequester(int port, MessageClosure message) {
             this.port = port;
             this.message = message ;
         }
@@ -614,7 +616,7 @@ public class TicketServer {
                     }
 
                     cslock.set(false);
-                    socketObjSend(new MessageClosure<String>( "From server "+serverIdx+": "+messageTOclient.message), out);
+                    socketObjSend(new MessageClosure<String>("From server " + serverIdx + ": " + messageTOclient.message), out);
 
                     out.flush();
                     out.close();
