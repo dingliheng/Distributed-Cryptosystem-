@@ -614,7 +614,7 @@ public class TicketServer {
                     }
 
                     cslock.set(false);
-                    socketObjSend(new MessageClosure<String>(messageTOclient.message), out);
+                    socketObjSend(new MessageClosure<String>( "From server "+serverIdx+": "+messageTOclient.message), out);
 
                     out.flush();
                     out.close();

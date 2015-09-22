@@ -43,7 +43,7 @@ public class Client {
                             n = portList.size();
                         }
                         random_port = new Random().nextInt(n);
-                        System.out.println("try to connect to server: "+ portList.get(random_port));
+                        System.out.println("try to connect to server: "+ random_port);
                         long startMili=System.currentTimeMillis();
                         while((System.currentTimeMillis()-startMili)<5000){
                             try{
@@ -75,7 +75,7 @@ public class Client {
                                 break;
                             }catch (Exception e){
                                 connected = false;
-                                System.out.println("sorry,try to connect again");
+//                                System.out.println("sorry,try to connect again");
                                 continue;
                             }
                         }
@@ -84,12 +84,12 @@ public class Client {
                 } catch(Exception e) {
                     System.out.print(e.getClass().getName() + "\n" + e.getMessage() + "\n");
                     e.printStackTrace(System.out);
-                    System.out.println("Woops, the server has crashed");
+                    System.out.println("Woops, the server is not online");
                     portList.remove(random_port);
                 }
             }
         }catch (Exception e){
-            System.out.println("Woops, the clinet has crashed");
+            System.out.println("Woops, the clinet is not online");
         }
 
 
