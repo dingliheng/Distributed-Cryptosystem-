@@ -46,12 +46,12 @@ public class WordCount {
             String[] tokens = value.toString().replaceAll("[^a-zA-Z0-9]"," ").toLowerCase().split(delims);
             List<String> tokenList = new ArrayList<>(Arrays.asList(tokens));
             tokenList.removeAll(Collections.singleton(""));
-            ArrayList<String> dupList = new ArrayList<>();
+            HashSet<String> dupSet = new HashSet<>();
             for (String token: tokenList ){
-                if (dupList.contains(token)){
+                if (dupSet.contains(token)){
                     continue;
                 }
-                dupList.add(token);
+                dupSet.add(token);
                 word.set(token);
                 List<String> newList = new ArrayList<>(tokenList);
                 newList.remove(token);
@@ -68,19 +68,19 @@ public class WordCount {
         public void reduce(Text key, Iterable<TextArrayWritable> values,
                            Context context
         ) throws IOException, InterruptedException {
-            MapWritable vector = new MapWritable() ;
+            MapWritable wordMapWritable = new MapWritable() ;
             IntWritable tmpInt;
             for (TextArrayWritable textArray: values){
                 for (Writable val: textArray.get()){
-                    tmpInt = (IntWritable) vector.get(val);
+                    tmpInt = (IntWritable) wordMapWritable.get(val);
                     if(tmpInt == null) {
                         tmpInt = new IntWritable(0);
-                        vector.put(new Text((Text)val), tmpInt);
+                        wordMapWritable.put(new Text((Text) val), tmpInt);
                     }
                     tmpInt.set(tmpInt.get() + 1);
                 }
             }
-            context.write(key, vector);
+            context.write(key, wordMapWritable);
         }
     }
 
