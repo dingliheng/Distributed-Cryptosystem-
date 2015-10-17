@@ -46,7 +46,6 @@ public class WordCount {
             String[] tokens = value.toString().replaceAll("[^a-zA-Z0-9]"," ").toLowerCase().split(delims);
             List<String> tokenList = new ArrayList<>(Arrays.asList(tokens));
             tokenList.removeAll(Collections.singleton(""));
-            int i = 0;
             ArrayList<String> dupList = new ArrayList<>();
             for (String token: tokenList ){
                 if (dupList.contains(token)){
@@ -112,14 +111,11 @@ public class WordCount {
         public void write(Text key, MapWritable value) throws IOException {
             out.write(key.toString().getBytes(utf8));
             out.write("\n".getBytes(utf8));
-
-            Iterator<Writable> it = value.keySet().iterator();
-            while (it.hasNext()) {
+            for (Writable writable : value.keySet()) {
                 out.write("<".getBytes(utf8));
-                Writable k = it.next();
-                IntWritable v = (IntWritable) value.get(k);
+                IntWritable v = (IntWritable) value.get(writable);
 
-                out.write(((Text) k).getBytes());
+                out.write(((Text) writable).getBytes());
                 out.write(", ".getBytes(utf8));
                 out.write(v.toString().getBytes(utf8));
                 out.write(">\n".getBytes(utf8));
