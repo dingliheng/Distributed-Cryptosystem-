@@ -111,7 +111,8 @@ public class WordCount {
         public void write(Text key, MapWritable value) throws IOException {
             out.write(key.toString().getBytes(utf8));
             out.write("\n".getBytes(utf8));
-            for (Writable writable : value.keySet()) {
+            SortedSet<Writable> keys = new TreeSet<>(value.keySet());
+            for (Writable writable : keys) {
                 out.write("<".getBytes(utf8));
                 IntWritable v = (IntWritable) value.get(writable);
 
