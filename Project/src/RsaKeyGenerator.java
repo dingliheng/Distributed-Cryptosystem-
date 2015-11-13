@@ -1,6 +1,7 @@
 /* RsaKeyGenerator.java
  * Copyright (c) 2013 by Dr. Herong Yang, herongyang.com
  */
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +54,30 @@ class RsaKeyGenerator {
 
 
         System.out.println("mod: "+df.multiply(ef).mod(m));
+        System.out.println("gcd: "+m.gcd(ef));
 
+        BigInteger data =BigInteger.valueOf(1231);
+        System.out.println("original data: "+data);
+
+        BigInteger edata = data.modPow(ef,n);
+        BigInteger edata_s = data;
+
+        for (int i=0; i<7 ;i++){
+            edata_s = edata_s.modPow(ea.get(i),n);
+        }
+
+        System.out.println("enc: "+edata);
+        System.out.println("enc_s: "+edata_s);
+
+        BigInteger ddata = edata.modPow(df,n);
+        BigInteger ddata_s = edata_s;
+
+        for (int i=0; i<7 ;i++){
+            ddata_s = ddata_s.modPow(da.get(i),n);
+        }
+
+        System.out.println("dec: "+ddata);
+        System.out.println("dec_s: "+ddata_s);
 
     }
     public static List<BigInteger> getCoprime(BigInteger m) {

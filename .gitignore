@@ -60,3 +60,13 @@ hs_err_pid*
 # crashlytics-build.properties
 
 assignment1/src/port.txt
+
+assignment1/src/build.sh
+
+assignment1/src/README
+
+assignment1/src/run_client.sh
+
+assignment1/src/run_server.sh
+
+assignment2/src/META-INF/MANIFEST.MF
