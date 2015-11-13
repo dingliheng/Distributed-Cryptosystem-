@@ -48,6 +48,7 @@ class RsaKeyGenerator {
 
         System.out.println("Final Public key: "+ef);
         System.out.println("Final Private key: "+df);
+        System.out.println("Final key size : "+df.multiply(ef).bitLength());
 
 
 
