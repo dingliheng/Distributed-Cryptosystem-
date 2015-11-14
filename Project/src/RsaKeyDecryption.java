@@ -16,20 +16,20 @@ class RsaKeyDecryption {
 //        String keyFile = a[0];
 //        String input = a[1];
 //        String output = a[2];
-        RsaKeyDecryption encryptor3 = new RsaKeyDecryption(3);
-        encryptor3.initdecrypt("output.txt", "interput.txt");
-        RsaKeyDecryption encryptor5 = new RsaKeyDecryption(5);
-        encryptor5.interdecrypt("interput.txt");
-        RsaKeyDecryption encryptor4 = new RsaKeyDecryption(4);
-        encryptor4.interdecrypt("interput.txt");
-        RsaKeyDecryption encryptor6 = new RsaKeyDecryption(6);
-        encryptor6.interdecrypt("interput.txt");
-        RsaKeyDecryption encryptor1 = new RsaKeyDecryption(1);
-        encryptor1.interdecrypt("interput.txt");
-        RsaKeyDecryption encryptor2 = new RsaKeyDecryption(2);
-        encryptor2.interdecrypt("interput.txt");
-        RsaKeyDecryption encryptor = new RsaKeyDecryption(0);
-        encryptor.findecrypt("interput.txt", "decrypt.txt");
+        RsaKeyDecryption decryptor3 = new RsaKeyDecryption(3);
+        decryptor3.initdecrypt("output.txt", "interput.txt");  // "initdencrypt" method
+        RsaKeyDecryption decryptor5 = new RsaKeyDecryption(5);
+        decryptor5.interdecrypt("interput.txt");    // "interdencrypt" method
+        RsaKeyDecryption decryptor4 = new RsaKeyDecryption(4);
+        decryptor4.interdecrypt("interput.txt");
+        RsaKeyDecryption decryptor6 = new RsaKeyDecryption(6);
+        decryptor6.interdecrypt("interput.txt");
+        RsaKeyDecryption decryptor1 = new RsaKeyDecryption(1);
+        decryptor1.interdecrypt("interput.txt");
+        RsaKeyDecryption decryptor2 = new RsaKeyDecryption(2);
+        decryptor2.interdecrypt("interput.txt");
+        RsaKeyDecryption decryptor = new RsaKeyDecryption(0);
+        decryptor.findecrypt("interput.txt", "decrypt.txt");    // "findencrypt" method
     }
 
     // Reading in RSA private key
