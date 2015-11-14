@@ -13,10 +13,10 @@ class RsaKeyEncryption {
 //        String input = a[1];
 //        String output = a[2];
 //
-        RsaKeyEncryption encryptor6 = new RsaKeyEncryption(6);
-        encryptor6.initencrypt("input.txt", "interput.txt");
+        RsaKeyEncryption encryptor6 = new RsaKeyEncryption(6); //create an encryptor which uses publick key6
+        encryptor6.initencrypt("input.txt", "interput.txt"); //the first encryption uses the "initencrypt" method
         RsaKeyEncryption encryptor1 = new RsaKeyEncryption(1);
-        encryptor1.interencrypt("interput.txt");
+        encryptor1.interencrypt("interput.txt");  //the intermediate encryptions use the "interencrypt" method
         RsaKeyEncryption encryptor2 = new RsaKeyEncryption(2);
         encryptor2.interencrypt("interput.txt");
         RsaKeyEncryption encryptor3 = new RsaKeyEncryption(3);
@@ -26,7 +26,7 @@ class RsaKeyEncryption {
         RsaKeyEncryption encryptor5 = new RsaKeyEncryption(5);
         encryptor5.interencrypt("interput.txt");
         RsaKeyEncryption encryptor0 = new RsaKeyEncryption(0);
-        encryptor0.finencrypt("interput.txt", "output.txt");
+        encryptor0.finencrypt("interput.txt", "output.txt"); //the final encryption uses the "finercrypt" method
     }
 
     // Reading in RSA public key
