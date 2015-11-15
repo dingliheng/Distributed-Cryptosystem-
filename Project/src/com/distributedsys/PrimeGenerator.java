@@ -1,4 +1,4 @@
-/* PrimeGenerator.java
+package com.distributedsys;/* com.distributedsys.PrimeGenerator.java
  * Copyright (c) 2013 by Dr. Herong Yang, herongyang.com
  */
 import java.math.BigInteger;
@@ -7,7 +7,7 @@ class PrimeGenerator {
     public static void main(String[] a) {
         if (a.length<2) {
             System.out.println("Usage:");
-            System.out.println("java PrimeGenerator length certainty");
+            System.out.println("java com.distributedsys.PrimeGenerator length certainty");
             return;
         }
         int length = Integer.parseInt(a[0]);

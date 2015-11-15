@@ -1,3 +1,5 @@
+package com.distributedsys;
+
 import java.math.BigInteger;
 import java.io.*;
 
@@ -6,7 +8,7 @@ class RsaKeyEncryption {
     public static void main(String[] a) {
 //        if (a.length<3) {
 //            System.out.println("Usage:");
-//            System.out.println("java RsaKeyEncryption key input output");
+//            System.out.println("java com.distributedsys.RsaKeyEncryption key input output");
 //            return;
 //        }
 //        String keyFile = a[0];

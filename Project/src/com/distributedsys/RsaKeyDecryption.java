@@ -1,16 +1,15 @@
-/**
+package com.distributedsys; /**
  * Created by Liheng on 2015/11/14.
  */
 import java.math.BigInteger;
 import java.io.*;
-import java.util.Arrays;
 
 class RsaKeyDecryption {
     private BigInteger n, d;
     public static void main(String[] a) {
 //        if (a.length<3) {
 //            System.out.println("Usage:");
-//            System.out.println("java RsaKeyDecryption key input output");
+//            System.out.println("java com.distributedsys.RsaKeyDecryption key input output");
 //            return;
 //        }
 //        String keyFile = a[0];

@@ -1,3 +1,5 @@
+package com.distributedsys;
+
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -9,7 +11,7 @@ class RsaKeyGenerator {
     public static void main(String[] a) {
         if (a.length<1) {
             System.out.println("Usage:");
-            System.out.println("java RsaKeyGenerator size");
+            System.out.println("java com.distributedsys.RsaKeyGenerator size");
             return;
         }
         int size = Integer.parseInt(a[0]);
