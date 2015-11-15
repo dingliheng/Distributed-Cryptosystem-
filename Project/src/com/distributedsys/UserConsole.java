@@ -11,7 +11,7 @@ import static com.distributedsys.Message.*;
 /**
  * Created by jpan on 11/14/15.
  */
-public class InputConsole {
+public class UserConsole {
     public static void main(String[] a) {
         try {
             File portfile = new File("port.txt");
@@ -90,11 +90,11 @@ public class InputConsole {
         public Boolean call() {
             try{
                 Socket skt = new Socket("localhost", port);
-                InputStream in = skt.getInputStream();
+//                InputStream in = skt.getInputStream();
                 OutputStream out = skt.getOutputStream();
                 socketObjSend(message, out);
                 out.flush();
-                in.close();
+//                in.close();
                 out.close();
                 skt.close();
                 return true;

@@ -2,10 +2,7 @@ package com.distributedsys;
 
 import javax.imageio.IIOException;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by jpan on 11/9/15.
@@ -36,6 +33,41 @@ public class Message {
         oos.writeObject(obj);
     }
 
+    public static class PathMessage implements Serializable{
+        private final ProcType proctype;
+        private final String filename;
+        private final int destnode;
+        private final List<Integer> path;
+
+        public PathMessage(ProcType proctype, String filename, int destnode, List<Integer> path) {
+            this.proctype = proctype;
+            this.filename = filename;
+            this.destnode = destnode;
+            this.path = path;
+        }
+
+        public ProcType getProctype() {
+            return proctype;
+        }
+
+        public String getFilename() {
+            return filename;
+        }
+
+        public int getDestnode() {
+            return destnode;
+        }
+
+        public List<Integer> getPath() {
+            return path;
+        }
+
+        @Override
+        public String toString() {
+            return "PathMessage("+proctype.name()+",data: "+filename+", Node: "+destnode+", path:  "+path+")\n";
+        }
+    }
+
     public static class KickMessage implements Serializable{
         private final ProcType proctype;
         private final String filename;
@@ -45,6 +77,18 @@ public class Message {
             this.proctype = proctype;
             this.filename = filename;
             this.destnode = destnode;
+        }
+
+        public ProcType getProctype() {
+            return proctype;
+        }
+
+        public String getFilename() {
+            return filename;
+        }
+
+        public int getDestnode() {
+            return destnode;
         }
 
         @Override
@@ -83,7 +127,7 @@ public class Message {
         Set<Integer> portdup = new HashSet<>();
         while ((line = br.readLine()) != null) {
             String[] tokens = line.trim().split("\\s+");
-            int firstport = portlist.get(Integer.parseInt(tokens[0])-1);
+            int firstport = portlist.get(Integer.parseInt(tokens[0]));
             if (!portdup.contains(firstport)){
                 portdup.add(firstport);
                 initport.add(firstport);
@@ -91,5 +135,93 @@ public class Message {
         }
         br.close();
         return initport;
+    }
+
+    public static List<Integer> getKeyfrgList (int nodeId, File keyFrgMap) throws IOException{
+        BufferedReader br = new BufferedReader(new FileReader(keyFrgMap));
+        List<Integer> keyFrgList = new ArrayList<>();
+        String line;
+        int counter = 0;
+        while ((line = br.readLine()) != null) {
+            if (counter == nodeId){
+                String[] tokens = line.trim().split("\\s+");
+                for (String token: tokens){
+                    keyFrgList.add(Integer.parseInt(token));
+                }
+                break;
+            }
+            counter++;
+        }
+        return keyFrgList;
+    }
+
+    public static List<Integer> getNextNodePortList (int nodeId, File nodeMap,List<Integer> portlist, List<Integer> match) throws IOException{
+        BufferedReader br = new BufferedReader(new FileReader(nodeMap));
+        List<Integer> nextNodeList = new ArrayList<>();
+        String line;
+        Set<Integer> portdup = new HashSet<>();
+        int counter= 0;
+        while ((line = br.readLine()) != null && match.contains(counter++)) {
+            String[] tokens = line.trim().split("\\s+");
+            boolean findFlag = false;
+            for (String token: tokens){
+                int node = Integer.parseInt(token);
+                if (portdup.contains(node)) break;
+                if (findFlag){
+                    portdup.add(node);
+                    nextNodeList.add(portlist.get(node));
+                    break;
+                }
+                if ((node == nodeId)&&!portdup.contains(node)){
+                    findFlag = true;
+                }
+            }
+        }
+        br.close();
+
+        return nextNodeList;
+    }
+
+    public static List<Integer> matchPath (int nodeId, File nodeMap,List<Integer> path) throws IOException{
+        BufferedReader br = new BufferedReader(new FileReader(nodeMap));
+        List<Integer> matchList = new ArrayList<>();
+        String line;
+        Iterator<Integer> pathIter = path.iterator();
+        if (pathIter.hasNext()){
+            int currnode = pathIter.next();
+            int counter = 0;
+            while ((line = br.readLine()) != null) {
+                String[] tokens = line.trim().split("\\s+");
+                for (String token: tokens){
+                    int node = Integer.parseInt(token);
+                    if (currnode != node){
+                        pathIter = path.iterator();
+                        currnode = pathIter.next();
+                        break;
+                    }
+                    if (!pathIter.hasNext()){
+                        matchList.add(counter);
+                        pathIter = path.iterator();
+                        currnode = pathIter.next();
+                        break;
+                    }else {
+                        currnode = pathIter.next();
+                    }
+                }
+                counter++;
+            }
+        }
+
+        br.close();
+
+        return matchList;
+    }
+
+    public static List<Integer> makeSequence(int begin, int end) {
+        List<Integer> ret = new ArrayList(end - begin + 1);
+        for(int i = begin; i <= end; i++){
+            ret.add(i);
+        }
+        return ret;
     }
 }

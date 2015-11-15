@@ -15,20 +15,21 @@ class RsaKeyEncryption {
 //        String input = a[1];
 //        String output = a[2];
 //
+        String interput;
         RsaKeyEncryption encryptor6 = new RsaKeyEncryption(6); //create an encryptor which uses publick key6
-        encryptor6.initencrypt("input.txt", "interput.txt"); //the first encryption uses the "initencrypt" method
+        interput = encryptor6.initencrypt("input.txt"); //the first encryption uses the "initencrypt" method
         RsaKeyEncryption encryptor1 = new RsaKeyEncryption(1);
-        encryptor1.interencrypt("interput.txt");  //the intermediate encryptions use the "interencrypt" method
+        interput =encryptor1.interencrypt(interput);  //the intermediate encryptions use the "interencrypt" method
         RsaKeyEncryption encryptor2 = new RsaKeyEncryption(2);
-        encryptor2.interencrypt("interput.txt");
+        interput =encryptor2.interencrypt(interput);
         RsaKeyEncryption encryptor3 = new RsaKeyEncryption(3);
-        encryptor3.interencrypt("interput.txt");
+        interput =encryptor3.interencrypt(interput);
         RsaKeyEncryption encryptor4 = new RsaKeyEncryption(4);
-        encryptor4.interencrypt("interput.txt");
+        interput =encryptor4.interencrypt(interput);
         RsaKeyEncryption encryptor5 = new RsaKeyEncryption(5);
-        encryptor5.interencrypt("interput.txt");
+        interput =encryptor5.interencrypt(interput);
         RsaKeyEncryption encryptor0 = new RsaKeyEncryption(0);
-        encryptor0.finencrypt("interput.txt", "output.txt"); //the final encryption uses the "finercrypt" method
+        encryptor0.finencrypt(interput, "output.txt"); //the final encryption uses the "finercrypt" method
     }
 
     // Reading in RSA public key
@@ -55,7 +56,7 @@ class RsaKeyEncryption {
     }
 
     // Encrypting original message
-    public void initencrypt(String intput, String output) {
+    public String initencrypt(String intput) {
         int keySize = n.bitLength();                       // In bits
         int clearTextSize = Math.min((keySize-1)/8,256);   // In bytes
         int cipherTextSize = 1 + (keySize-1)/8;            // In bytes
@@ -63,7 +64,7 @@ class RsaKeyEncryption {
         System.out.println("Ciphertext block size: "+cipherTextSize);
         try {
             FileInputStream fis = new FileInputStream(intput);
-            OutputStreamWriter fos = new OutputStreamWriter(new FileOutputStream(output),"utf-8");
+//            OutputStreamWriter fos = new OutputStreamWriter(new FileOutputStream(output),"utf-8");
             byte[] clearTextBlock = new byte[clearTextSize];
             byte[] cipherTextBlock = new byte[cipherTextSize];
             long blocks = 0;
@@ -72,6 +73,7 @@ class RsaKeyEncryption {
 
 //       Reading input message
 //            System.out.println("cipherText");
+            StringWriter outstring = new StringWriter();
             while (dataSize>0) {
                 blocks++;
                 if (dataSize<clearTextSize) {
@@ -82,7 +84,8 @@ class RsaKeyEncryption {
                 BigInteger clearText = new BigInteger(1,clearTextBlock);
                 BigInteger cipherText = clearText.modPow(e,n);
                 System.out.println(cipherText.toString());
-                fos.write(cipherText.toString()+"\n");
+//                fos.write(cipherText.toString()+"\n");
+                outstring.write(cipherText.toString()+"\n");
 
 //                byte[] cipherTextData = cipherText.toByteArray();
 //                putBytesBlock(cipherTextBlock,cipherTextData);
@@ -98,18 +101,21 @@ class RsaKeyEncryption {
                 BigInteger clearText = new BigInteger(1,clearTextBlock);
                 BigInteger cipherText = clearText.modPow(e,n);
                 System.out.println(cipherText.toString());
-                fos.write(cipherText.toString()+"\n");
+                outstring.write(cipherText.toString()+"\n");
 //                byte[] cipherTextData = cipherText.toByteArray();
 //                putBytesBlock(cipherTextBlock,cipherTextData);
 //                fos.write(cipherTextBlock);
             }
 
             fis.close();
-            fos.close();
+            outstring.close();
             System.out.println("Encryption block count: "+blocks);
+            return outstring.toString();
         } catch (Exception ex) {
             ex.printStackTrace();
+            return null;
         }
+
     }
 
     // Putting bytes data into a block
@@ -137,11 +143,12 @@ class RsaKeyEncryption {
         }
     }
 
-    public void interencrypt(String file){
+    public String interencrypt(String string){
         String output = "";
         try {
-            BufferedReader in = new BufferedReader(new FileReader(file));
+            BufferedReader in = new BufferedReader(new StringReader(string));
             String line = in.readLine();
+            StringWriter outstring = new StringWriter();
             while (line!=null&&line.length()!=0) {
                 BigInteger clearText = new BigInteger(line);
                 BigInteger cipherText = clearText.modPow(e, n);
@@ -149,11 +156,13 @@ class RsaKeyEncryption {
                 line = in.readLine();
             }
 //            System.out.println("cipherText\n"+output);
-            OutputStreamWriter fos = new OutputStreamWriter(new FileOutputStream(file),"utf-8");
-            fos.write(output+"\n");
-            fos.close();
+//            OutputStreamWriter fos = new OutputStreamWriter(new FileOutputStream(file),"utf-8");
+            outstring.write(output+"\n");
+            outstring.close();
+            return outstring.toString();
         }catch (Exception ex) {
             ex.printStackTrace();
+            return null;
         }
     }
 
@@ -165,7 +174,7 @@ class RsaKeyEncryption {
         System.out.println("final Ciphertext block size: "+cipherTextSize);
         String output = "";
         try {
-            BufferedReader in = new BufferedReader(new FileReader(interput));
+            BufferedReader in = new BufferedReader(new StringReader(interput));
             FileOutputStream fos = new FileOutputStream(outputfile);
             byte[] clearTextBlock = new byte[clearTextSize];
             byte[] cipherTextBlock = new byte[cipherTextSize];
@@ -183,6 +192,39 @@ class RsaKeyEncryption {
             fos.close();
         }catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+
+    public String finencrypt(String interput){
+        int keySize = n.bitLength();                       // In bits
+        int clearTextSize = Math.min((keySize-1)/8,256);   // In bytes
+        int cipherTextSize = 1 + (keySize-1)/8;            // In bytes
+        System.out.println("final Cleartext block size: "+clearTextSize);
+        System.out.println("final Ciphertext block size: "+cipherTextSize);
+        String output = "";
+        try {
+            BufferedReader in = new BufferedReader(new StringReader(interput));
+            ByteArrayOutputStream fos = new ByteArrayOutputStream();
+//            StringWriter outString = new StringWriter();
+            byte[] clearTextBlock = new byte[clearTextSize];
+            byte[] cipherTextBlock = new byte[cipherTextSize];
+            String line = in.readLine();
+            while (line!=null&&line.length()!=0) {
+                BigInteger clearText = new BigInteger(line);
+                BigInteger cipherText = clearText.modPow(e, n);
+                output = output + cipherText+"\n";
+                byte[] cipherTextData = cipherText.toByteArray();
+                putBytesBlock(cipherTextBlock,cipherTextData);
+                fos.write(cipherTextBlock);
+                line = in.readLine();
+            }
+//            System.out.println("cipherText\n"+output);
+            fos.close();
+            return fos.toString();
+        }catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
         }
     }
 }
