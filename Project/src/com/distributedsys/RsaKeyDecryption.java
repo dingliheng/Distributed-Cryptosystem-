@@ -31,6 +31,7 @@ class RsaKeyDecryption {
         RsaKeyDecryption decryptor = new RsaKeyDecryption(0);
 //        decryptor.findecrypt(interput, "decrypt.txt");    // "findencrypt" method
         interput =  decryptor.interdecrypt(interput);
+        decryptor.finalwritetofile(interput, "decrypt.txt");
         System.out.println("intervalue: "+ interput);
     }
 
@@ -143,16 +144,18 @@ class RsaKeyDecryption {
             }
         }
 
-    public void findecrypt(String input, String outputfile) {
+    public String finalwritetofile(String input, String outputfile) {
         int keySize = n.bitLength();                       // In bits
         int clearTextSize = Math.min((keySize-1)/8,256);   // In bytes
         int cipherTextSize = 1 + (keySize-1)/8;            // In bytes
-        System.out.println("Cleartext block size: "+clearTextSize);
-        System.out.println("Ciphertext block size: "+cipherTextSize);
+//        System.out.println("Cleartext block size: "+clearTextSize);
+//        System.out.println("Ciphertext block size: "+cipherTextSize);
         String output = "";
         try {
             BufferedReader in = new BufferedReader(new StringReader(input));
             OutputStreamWriter fos = new OutputStreamWriter(new FileOutputStream(outputfile),"utf-8");
+            StringWriter foss = new StringWriter();
+
             byte[] clearTextBlock = new byte[clearTextSize];
             long blocks = 0;
             int dataSize = 0;
@@ -161,7 +164,8 @@ class RsaKeyDecryption {
                 blocks++;
                 BigInteger cipherText = new BigInteger(line);
                 System.out.println(cipherText);
-                BigInteger clearText = cipherText.modPow(d, n);
+//                BigInteger clearText = cipherText.modPow(d, n);
+                BigInteger clearText = cipherText;
                 System.out.println(clearText);
                 byte[] clearTextData = clearText.toByteArray();
                 putBytesBlock(clearTextBlock, clearTextData);
@@ -173,12 +177,16 @@ class RsaKeyDecryption {
             String match = "("+s+")*$";
             output = output.replaceAll(match, "");
             fos.write(output);
+            foss.write(output);
             System.out.println(output);
             in.close();
             fos.close();
-            System.out.println("Decryption block count: "+blocks);
+            foss.close();
+//            System.out.println("Decryption block count: "+blocks);
+            return foss.toString();
         }catch(Exception ex){
             ex.printStackTrace();
+            return null;
         }
     }
 

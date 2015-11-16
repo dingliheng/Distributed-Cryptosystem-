@@ -1,9 +1,12 @@
 package com.distributedsys;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.*;
 
 import static com.distributedsys.Message.*;
@@ -12,15 +15,24 @@ import static com.distributedsys.Message.*;
  * Created by jpan on 11/14/15.
  */
 public class UserConsole {
+
+    public static String outputname = "defaultout.txt";
     public static void main(String[] a) {
         try {
             File portfile = new File("port.txt");
             List<Integer> portlist = ReadPortFile(portfile);
             BufferedReader sin = new BufferedReader(new InputStreamReader(System.in));
+            int id = 0;
+            Runnable returnRequestHandler = new ReturnRequestHandler();
+            new Thread(returnRequestHandler).start();
+
             while (true) {
                 System.out.println("InputFilename:");
                 String line=sin.readLine();
                 String filename = new String(line);
+                System.out.println("OutputFilename:");
+                line=sin.readLine();
+                outputname = new String(line);
                 System.out.println("Mode: [E/D]:");
                 line=sin.readLine();
                 List<Integer> initlist = getInitPort(portlist, new File("node_map.txt"));
@@ -37,7 +49,7 @@ public class UserConsole {
                         return;
                 }
                 System.out.println("init nodes: "+ initlist);
-                startProcInvoke(initlist, procType,filename);
+                startProcInvoke(initlist, procType,filename, id++);
             }
 
         }
@@ -48,10 +60,10 @@ public class UserConsole {
 
     }
 
-    private static void startProcInvoke(List<Integer> initList, ProcType procType, String data) throws Exception{
+    private static void startProcInvoke(List<Integer> initList, ProcType procType, String data, int id) throws Exception{
         List<Kicknode> kicknodeList = new ArrayList<>();
         for (int port : initList){
-            MessageClosure<KickMessage> kickMessageClosure = new MessageClosure<>(new KickMessage(procType,data,port));
+            MessageClosure<KickMessage> kickMessageClosure = new MessageClosure<>(new KickMessage(procType,data,port,id));
             kicknodeList.add(new Kicknode(port, kickMessageClosure));
         }
         if (kicknodeList.size() >0) {
@@ -103,6 +115,56 @@ public class UserConsole {
             }catch (Exception e){
                 System.err.println("port "+port+" is dead");
                 return false;
+            }
+        }
+    }
+
+    private static class ReturnRequestHandler implements Runnable{
+        @Override
+        public void run() {
+            Set<Integer> idSet = new HashSet<>();
+            ServerSocket srvr = null;
+            try{
+                srvr = new ServerSocket(userport);
+            }catch (IOException e){
+                System.err.println(e.getStackTrace());
+            }
+            while (true) {
+               try{
+                   Socket clientSocket = srvr.accept();
+                   System.out.print("\nReturn end has connected!\n");
+                   InputStream inputStream = clientSocket.getInputStream();
+                   MessageClosure receivedmessage = (MessageClosure) socketObjReceive(inputStream);
+                   if (receivedmessage.getMyType() == FinalMessage.class){
+                       FinalMessage finalMessage = (FinalMessage) receivedmessage.getObject();
+                       if (!idSet.contains(finalMessage.getId())){
+                           idSet.add(finalMessage.getId());
+                           System.out.println(finalMessage);
+                           ProcType procType = finalMessage.getProctype();
+                           switch (procType){
+                               case ENC:
+                                   RsaKeyEncryption encryptor = new RsaKeyEncryption(0);
+                                   encryptor.finalwritetofile(finalMessage.getData(), outputname);
+                                   System.out.println("Enc Done, ID: "+ finalMessage.getId());
+                                   break;
+                               case DEC:
+                                   RsaKeyDecryption decryptor = new RsaKeyDecryption(0);
+                                   String finaldata = decryptor.finalwritetofile(finalMessage.getData(), outputname);
+                                   System.out.println("Dec Done, ID: "+ finalMessage.getId());
+                                   System.out.println("Data: "+ finaldata);
+                                   break;
+                           }
+                       }else{
+                           System.out.println("Throw away dup message");
+                       }
+                   } else {
+                       System.err.println("Expect to receive final package");
+                   }
+
+
+               } catch (Exception e){
+                   System.err.println(e.getStackTrace());
+               }
             }
         }
     }

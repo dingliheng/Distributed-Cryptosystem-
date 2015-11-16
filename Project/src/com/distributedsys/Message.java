@@ -10,6 +10,8 @@ import java.util.*;
  */
 public class Message {
     public static final int nodeNum = 7;
+    public static final int userport  = 1241;
+
     public static ArrayList<Integer> ReadPortFile(File fin) throws IOException {
         // Construct BufferedReader from FileReader
         ArrayList<Integer> portArray = new ArrayList<Integer>();
@@ -40,17 +42,25 @@ public class Message {
         private final int destnode;
         private final List<Integer> path;
         private final String intervalue;
+        private final int id ;
 
         public String getIntervalue() {
             return intervalue;
         }
 
-        public PathMessage(ProcType proctype, String filename, int destnode, String intervalue, List<Integer> path) {
+        public int getId() {
+            return id;
+        }
+
+        public PathMessage(ProcType proctype, String filename, int destnode, String intervalue, List<Integer> path, int id) {
             this.proctype = proctype;
             this.filename = filename;
             this.destnode = destnode;
             this.path = path;
             this.intervalue = intervalue;
+            this.id = id ;
+
+
 
         }
 
@@ -80,11 +90,17 @@ public class Message {
         private final ProcType proctype;
         private final String filename;
         private final int destnode;
+        private final int id ;
 
-        public KickMessage(ProcType proctype, String filename, int destnode) {
+        public KickMessage(ProcType proctype, String filename, int destnode, int id) {
             this.proctype = proctype;
             this.filename = filename;
             this.destnode = destnode;
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
         }
 
         public ProcType getProctype() {
@@ -102,6 +118,35 @@ public class Message {
         @Override
         public String toString() {
             return "KickMessage("+proctype.name()+",data: "+filename+", Node: "+destnode+")\n";
+        }
+    }
+
+    public static class FinalMessage implements Serializable{
+        private final ProcType proctype;
+        private final String data;
+        private final int id ;
+
+        public FinalMessage(ProcType proctype, String data, int id) {
+            this.proctype = proctype;
+            this.data = data;
+            this.id = id;
+        }
+
+        public ProcType getProctype() {
+            return proctype;
+        }
+
+        public String getData() {
+            return data;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        @Override
+        public String toString() {
+            return "FinalMessage("+proctype.name()+",data: "+data+", ID: "+id+")\n";
         }
     }
 
@@ -256,6 +301,25 @@ public class Message {
 
         br.close();
         return encfrg;
+    }
+
+    public static List<Integer> getpathfrg(File keyfrg, List<Integer> path) throws IOException{
+        BufferedReader br = new BufferedReader(new FileReader(keyfrg));
+        Set<Integer> dupset = new HashSet<>();
+        String line;
+        int counter = 0;
+        while ((line = br.readLine()) != null) {
+            if (path.contains(counter)){
+                dupset.addAll(getKeyfrgList(counter, keyfrg));
+            }
+            counter++;
+        }
+        System.out.println("dupset is "+ dupset);
+
+        br.close();
+        List<Integer> returnlist = new ArrayList<Integer>();
+        returnlist.addAll(dupset);
+        return returnlist;
     }
 
 

@@ -143,7 +143,8 @@ public class CryptoNode {
                                                                 kickMessage.getFilename(),
                                                                 kickMessage.getDestnode(),
                                                                 intervalue,
-                                                                new ArrayList<Integer>(Collections.singletonList(nodeIdx))
+                                                                new ArrayList<Integer>(Collections.singletonList(nodeIdx)),
+                                                                kickMessage.getId()
                                                                 );
                     System.out.println("next ports are: "+nextPortList);
                     NextProcInvoke(nextPortList,pathMessage);
@@ -237,6 +238,30 @@ public class CryptoNode {
                     socket.close();
                     List<Integer> path = pathMessage.getPath();
                     String intervalue = pathMessage.getIntervalue();
+
+                    List<Integer> pathfrg = getpathfrg(new File("keyfrg_map.txt"), path);
+                    String checkdata = new String(intervalue);
+                    for (int keyfrg : pathfrg){
+                        switch (type){
+                            case DEC:
+                                RsaKeyEncryption encryptor = new RsaKeyEncryption(keyfrg);
+                                checkdata = encryptor.interencrypt(checkdata);
+//                                System.out.println("Encryting with key "+keyfrg);
+                                break;
+                            case ENC:
+                                RsaKeyDecryption decryptor = new RsaKeyDecryption(keyfrg);
+                                checkdata = decryptor.interdecrypt(checkdata);
+//                                System.out.println("Decryting with key "+keyfrg);
+                                break;
+                            default:
+                                System.err.println("Expecting ENC/DEC");
+                                throw new Exception();
+                        }
+                    }
+
+
+
+
                     List<Integer> enList = getEncfrg(new File("keyfrg_map.txt"), path, keyFrgList);
                     System.out.println("these keys needed to be proc: "+ enList);
 
@@ -269,7 +294,8 @@ public class CryptoNode {
                             pathMessage.getFilename(),
                             pathMessage.getDestnode(),
                             intervalue,
-                            path
+                            path,
+                            pathMessage.getId()
                     );
                     System.out.println("next ports are: "+nextPortList);
 
@@ -277,6 +303,14 @@ public class CryptoNode {
                         NextProcInvoke(nextPortList,pathMessage);
                     } else{
                         System.out.println("Final value is: "+intervalue);
+                        FinalMessage finalMessage = new FinalMessage(pathMessage.getProctype(),intervalue,pathMessage.getId());
+                        MessageClosure<FinalMessage> finalMessageClosure = new MessageClosure<>(finalMessage);
+                        Socket skt = new Socket("localhost", userport);
+                        OutputStream out = skt.getOutputStream();
+                        socketObjSend(finalMessageClosure, out);
+                        out.flush();
+                        out.close();
+                        skt.close();
                     }
 
                 } catch (Exception e) {

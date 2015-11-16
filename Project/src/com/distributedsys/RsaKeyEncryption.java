@@ -32,6 +32,9 @@ class RsaKeyEncryption {
 //        encryptor0.finencrypt(interput, "output.txt"); //the final encryption uses the "finercrypt" method
         interput =encryptor0.interencrypt(interput);
 
+        RsaKeyEncryption encryptor11 = new RsaKeyEncryption(0);
+        encryptor11.finalwritetofile(interput,"output.txt");
+
     }
 
     // Reading in RSA public key
@@ -170,7 +173,7 @@ class RsaKeyEncryption {
         }
     }
 
-    public void finencrypt(String interput, String outputfile){
+    public void finalwritetofile(String interput, String outputfile){
         int keySize = n.bitLength();                       // In bits
         int clearTextSize = Math.min((keySize-1)/8,256);   // In bytes
         int cipherTextSize = 1 + (keySize-1)/8;            // In bytes
@@ -179,23 +182,32 @@ class RsaKeyEncryption {
         String output = "";
         try {
             BufferedReader in = new BufferedReader(new StringReader(interput));
-            FileOutputStream fos = new FileOutputStream(outputfile);
+            File file = new File(outputfile);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            FileOutputStream fos = new FileOutputStream(file);
+//            StringWriter foss = new StringWriter();
             byte[] clearTextBlock = new byte[clearTextSize];
             byte[] cipherTextBlock = new byte[cipherTextSize];
             String line = in.readLine();
             while (line!=null&&line.length()!=0) {
                 BigInteger clearText = new BigInteger(line);
-                BigInteger cipherText = clearText.modPow(e, n);
+//                BigInteger cipherText = clearText.modPow(e, n);
+                BigInteger cipherText = clearText;
                 output = output + cipherText+"\n";
                 byte[] cipherTextData = cipherText.toByteArray();
                 putBytesBlock(cipherTextBlock,cipherTextData);
                 fos.write(cipherTextBlock);
+//                foss.write(cipherTextBlock);
+
                 line = in.readLine();
             }
 //            System.out.println("cipherText\n"+output);
             fos.close();
+            in.close();
         }catch (Exception ex) {
-            ex.printStackTrace();
+            System.err.println(ex.getStackTrace());
         }
     }
 
