@@ -132,7 +132,7 @@ public class UserConsole {
             while (true) {
                try{
                    Socket clientSocket = srvr.accept();
-                   System.out.print("\nReturn end has connected!\n");
+//                   System.out.print("\nReturn end has connected!\n");
                    InputStream inputStream = clientSocket.getInputStream();
                    MessageClosure receivedmessage = (MessageClosure) socketObjReceive(inputStream);
                    if (receivedmessage.getMyType() == FinalMessage.class){
@@ -155,7 +155,7 @@ public class UserConsole {
                                    break;
                            }
                        }else{
-                           System.out.println("Throw away dup message");
+                           System.out.println("Throw away duplicated message");
                        }
                    } else {
                        System.err.println("Expect to receive final package");

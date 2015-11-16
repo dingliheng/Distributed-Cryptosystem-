@@ -54,10 +54,10 @@ class RsaKeyEncryption {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-//        System.out.println("--- Reading public key ---");
-//        System.out.println("Modulus: "+n);
-//        System.out.println("Key size: " + n.bitLength());
-//        System.out.println("Public key" + keyNum + ": " + e);
+        System.out.println("--- Reading public key ---");
+        System.out.println("Modulus: "+n);
+        System.out.println("Key size: " + n.bitLength());
+        System.out.println("Public key" + keyNum + ": " + e);
     }
 
     // Encrypting original message
