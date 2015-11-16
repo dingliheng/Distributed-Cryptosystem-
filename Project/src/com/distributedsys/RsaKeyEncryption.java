@@ -16,20 +16,22 @@ class RsaKeyEncryption {
 //        String output = a[2];
 //
         String interput;
-        RsaKeyEncryption encryptor6 = new RsaKeyEncryption(6); //create an encryptor which uses publick key6
+        RsaKeyEncryption encryptor6 = new RsaKeyEncryption(0); //create an encryptor which uses publick key6
         interput = encryptor6.initencrypt("input.txt"); //the first encryption uses the "initencrypt" method
-        RsaKeyEncryption encryptor1 = new RsaKeyEncryption(1);
+        RsaKeyEncryption encryptor1 = new RsaKeyEncryption(5);
         interput =encryptor1.interencrypt(interput);  //the intermediate encryptions use the "interencrypt" method
-        RsaKeyEncryption encryptor2 = new RsaKeyEncryption(2);
+        RsaKeyEncryption encryptor2 = new RsaKeyEncryption(6);
         interput =encryptor2.interencrypt(interput);
-        RsaKeyEncryption encryptor3 = new RsaKeyEncryption(3);
+        RsaKeyEncryption encryptor3 = new RsaKeyEncryption(1);
         interput =encryptor3.interencrypt(interput);
-        RsaKeyEncryption encryptor4 = new RsaKeyEncryption(4);
+        RsaKeyEncryption encryptor4 = new RsaKeyEncryption(2);
         interput =encryptor4.interencrypt(interput);
-        RsaKeyEncryption encryptor5 = new RsaKeyEncryption(5);
+        RsaKeyEncryption encryptor5 = new RsaKeyEncryption(3);
         interput =encryptor5.interencrypt(interput);
-        RsaKeyEncryption encryptor0 = new RsaKeyEncryption(0);
-        encryptor0.finencrypt(interput, "output.txt"); //the final encryption uses the "finercrypt" method
+        RsaKeyEncryption encryptor0 = new RsaKeyEncryption(4);
+//        encryptor0.finencrypt(interput, "output.txt"); //the final encryption uses the "finercrypt" method
+        interput =encryptor0.interencrypt(interput);
+
     }
 
     // Reading in RSA public key
@@ -49,10 +51,10 @@ class RsaKeyEncryption {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        System.out.println("--- Reading public key ---");
-        System.out.println("Modulus: "+n);
-        System.out.println("Key size: " + n.bitLength());
-        System.out.println("Public key" + keyNum + ": " + e);
+//        System.out.println("--- Reading public key ---");
+//        System.out.println("Modulus: "+n);
+//        System.out.println("Key size: " + n.bitLength());
+//        System.out.println("Public key" + keyNum + ": " + e);
     }
 
     // Encrypting original message
@@ -60,8 +62,8 @@ class RsaKeyEncryption {
         int keySize = n.bitLength();                       // In bits
         int clearTextSize = Math.min((keySize-1)/8,256);   // In bytes
         int cipherTextSize = 1 + (keySize-1)/8;            // In bytes
-        System.out.println("Cleartext block size: "+clearTextSize);
-        System.out.println("Ciphertext block size: "+cipherTextSize);
+//        System.out.println("Cleartext block size: "+clearTextSize);
+//        System.out.println("Ciphertext block size: "+cipherTextSize);
         try {
             FileInputStream fis = new FileInputStream(intput);
 //            OutputStreamWriter fos = new OutputStreamWriter(new FileOutputStream(output),"utf-8");
@@ -110,6 +112,7 @@ class RsaKeyEncryption {
             fis.close();
             outstring.close();
             System.out.println("Encryption block count: "+blocks);
+            System.out.println("init encrypted value: "+outstring.toString());
             return outstring.toString();
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -159,6 +162,7 @@ class RsaKeyEncryption {
 //            OutputStreamWriter fos = new OutputStreamWriter(new FileOutputStream(file),"utf-8");
             outstring.write(output+"\n");
             outstring.close();
+            System.out.println("intevalue: "+ outstring.toString());
             return outstring.toString();
         }catch (Exception ex) {
             ex.printStackTrace();

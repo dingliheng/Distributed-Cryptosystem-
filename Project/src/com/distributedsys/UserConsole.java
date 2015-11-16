@@ -17,26 +17,28 @@ public class UserConsole {
             File portfile = new File("port.txt");
             List<Integer> portlist = ReadPortFile(portfile);
             BufferedReader sin = new BufferedReader(new InputStreamReader(System.in));
-            System.out.println("InputFilename:");
-            String line=sin.readLine();
-            String filename = new String(line);
-            System.out.println("Mode: [E/D]:");
-            line=sin.readLine();
-            List<Integer> initlist = getInitPort(portlist, new File("node_map.txt"));
-            ProcType procType;
-            switch (line.trim().toLowerCase()){
-                case "e":
-                    procType = ProcType.ENC;
-                    break;
-                case "d":
-                    procType = ProcType.DEC;
-                    break;
-                default:
-                    System.out.println("Enter E or D (Encryption or Decryption Mode)");
-                    return;
+            while (true) {
+                System.out.println("InputFilename:");
+                String line=sin.readLine();
+                String filename = new String(line);
+                System.out.println("Mode: [E/D]:");
+                line=sin.readLine();
+                List<Integer> initlist = getInitPort(portlist, new File("node_map.txt"));
+                ProcType procType;
+                switch (line.trim().toLowerCase()){
+                    case "e":
+                        procType = ProcType.ENC;
+                        break;
+                    case "d":
+                        procType = ProcType.DEC;
+                        break;
+                    default:
+                        System.out.println("Enter E or D (Encryption or Decryption Mode)");
+                        return;
+                }
+                System.out.println("init nodes: "+ initlist);
+                startProcInvoke(initlist, procType,filename);
             }
-            System.out.println("init nodes: "+ initlist);
-            startProcInvoke(initlist, procType,filename);
 
         }
         catch(Exception ex)

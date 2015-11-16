@@ -2,6 +2,7 @@ package com.distributedsys;
 
 import javax.imageio.IIOException;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -38,12 +39,19 @@ public class Message {
         private final String filename;
         private final int destnode;
         private final List<Integer> path;
+        private final String intervalue;
 
-        public PathMessage(ProcType proctype, String filename, int destnode, List<Integer> path) {
+        public String getIntervalue() {
+            return intervalue;
+        }
+
+        public PathMessage(ProcType proctype, String filename, int destnode, String intervalue, List<Integer> path) {
             this.proctype = proctype;
             this.filename = filename;
             this.destnode = destnode;
             this.path = path;
+            this.intervalue = intervalue;
+
         }
 
         public ProcType getProctype() {
@@ -161,19 +169,21 @@ public class Message {
         String line;
         Set<Integer> portdup = new HashSet<>();
         int counter= 0;
-        while ((line = br.readLine()) != null && match.contains(counter++)) {
-            String[] tokens = line.trim().split("\\s+");
-            boolean findFlag = false;
-            for (String token: tokens){
-                int node = Integer.parseInt(token);
-                if (portdup.contains(node)) break;
-                if (findFlag){
-                    portdup.add(node);
-                    nextNodeList.add(portlist.get(node));
-                    break;
-                }
-                if ((node == nodeId)&&!portdup.contains(node)){
-                    findFlag = true;
+        while ((line = br.readLine()) != null ) {
+            if (match.contains(counter++)) {
+                String[] tokens = line.trim().split("\\s+");
+                boolean findFlag = false;
+                for (String token: tokens){
+                    int node = Integer.parseInt(token);
+                    if (portdup.contains(node)) break;
+                    if (findFlag){
+                        portdup.add(node);
+                        nextNodeList.add(portlist.get(node));
+                        break;
+                    }
+                    if ((node == nodeId)&&!portdup.contains(node)){
+                        findFlag = true;
+                    }
                 }
             }
         }
@@ -182,7 +192,7 @@ public class Message {
         return nextNodeList;
     }
 
-    public static List<Integer> matchPath (int nodeId, File nodeMap,List<Integer> path) throws IOException{
+    public static List<Integer> matchPath (File nodeMap,List<Integer> path) throws IOException{
         BufferedReader br = new BufferedReader(new FileReader(nodeMap));
         List<Integer> matchList = new ArrayList<>();
         String line;
@@ -218,10 +228,48 @@ public class Message {
     }
 
     public static List<Integer> makeSequence(int begin, int end) {
-        List<Integer> ret = new ArrayList(end - begin + 1);
-        for(int i = begin; i <= end; i++){
+        List<Integer> ret = new ArrayList(end - begin);
+        for(int i = begin; i < end; i++){
             ret.add(i);
         }
         return ret;
+    }
+
+    public static List<Integer> getEncfrg(File keyfrg, List<Integer> path, List<Integer> selfkeyFrgList) throws IOException{
+        BufferedReader br = new BufferedReader(new FileReader(keyfrg));
+        List<Integer> encfrg = new ArrayList<>();
+        Set<Integer> dupset = new HashSet<>();
+        String line;
+        int counter = 0;
+        while ((line = br.readLine()) != null) {
+            if (path.contains(counter)){
+                dupset.addAll(getKeyfrgList(counter, keyfrg));
+            }
+            counter++;
+        }
+        System.out.println("dupset is "+ dupset);
+        for (int selfkeyfrg: selfkeyFrgList){
+            if (!dupset.contains(selfkeyfrg)){
+                encfrg.add(selfkeyfrg);
+            }
+        }
+
+        br.close();
+        return encfrg;
+    }
+
+
+    public static void main(String[] a) throws Exception{
+        List<Integer> portlist = ReadPortFile(new File("port.txt"));
+        ArrayList <Integer> path = new ArrayList<>();
+        path.add(0);
+        path.add(3);
+
+        List<Integer> fin = matchPath(new File("node_map.txt"), path);
+
+        System.out.println(fin);
+
+        List<Integer> next =  getNextNodePortList(4, new File("node_map.txt"), portlist, fin);
+        System.out.println(next);
     }
 }

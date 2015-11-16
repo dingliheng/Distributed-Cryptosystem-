@@ -29,7 +29,9 @@ class RsaKeyDecryption {
         RsaKeyDecryption decryptor2 = new RsaKeyDecryption(2);
         interput =  decryptor2.interdecrypt(interput);
         RsaKeyDecryption decryptor = new RsaKeyDecryption(0);
-        decryptor.findecrypt(interput, "decrypt.txt");    // "findencrypt" method
+//        decryptor.findecrypt(interput, "decrypt.txt");    // "findencrypt" method
+        interput =  decryptor.interdecrypt(interput);
+        System.out.println("intervalue: "+ interput);
     }
 
     // Reading in RSA private key

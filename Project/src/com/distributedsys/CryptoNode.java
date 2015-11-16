@@ -67,7 +67,7 @@ public class CryptoNode {
                 RequestPackage requestPackage = new RequestPackage(clientSocket, receivedmessage);
                 if (receivedmessage.getMyType() == KickMessage.class){
                     kickmessageQ.put(requestPackage);
-                    System.out.println("Kick Request enter Queue");
+                    System.out.println("Kick Request enter Queue"+requestPackage.messageClosure.getObject().toString());
                 } else {
                     nodemessageQ.put(requestPackage);
                     System.out.println("Node Request enter Queue: "+requestPackage.messageClosure.getObject().toString());
@@ -102,26 +102,47 @@ public class CryptoNode {
                     KickMessage kickMessage = (KickMessage) messageClosure.getObject();
                     socket.close();
 
-                    String intervalue;
-                    for (int keyfrg : keyFrgList){
+                    String intervalue = null;
+
+                    switch (kickMessage.getProctype()){
+                        case ENC:
+                            RsaKeyEncryption encryptor = new RsaKeyEncryption(keyFrgList.get(0));
+                            intervalue = encryptor.initencrypt(kickMessage.getFilename());
+                            System.out.println("Init Encryting with key "+keyFrgList.get(0));
+                            break;
+                        case DEC:
+                            RsaKeyDecryption decryptor = new RsaKeyDecryption(keyFrgList.get(0));
+                            intervalue = decryptor.initdecrypt(kickMessage.getFilename());
+                            System.out.println("Init Decryting with key "+keyFrgList.get(0));
+                            break;
+                        default:
+                            System.err.println("Expecting ENC/DEC");
+                            throw new Exception();
+                    }
+                    List<Integer> newkeyFrgList = new ArrayList<>(keyFrgList);
+                    newkeyFrgList.remove(0);
+                    for (int keyfrg : newkeyFrgList){
                         switch (kickMessage.getProctype()){
                             case ENC:
                                 RsaKeyEncryption encryptor = new RsaKeyEncryption(keyfrg);
-                                intervalue = encryptor.initencrypt(kickMessage.getFilename());
+                                intervalue = encryptor.interencrypt(intervalue);
+                                System.out.println("Encryting with key "+keyfrg);
                                 break;
                             case DEC:
                                 RsaKeyDecryption decryptor = new RsaKeyDecryption(keyfrg);
-                                intervalue = decryptor.initdecrypt(kickMessage.getFilename());
+                                intervalue = decryptor.interdecrypt(intervalue);
+                                System.out.println("Decryting with key "+keyfrg);
                                 break;
                             default:
                                 System.err.println("Expecting ENC/DEC");
                                 throw new Exception();
                         }
                     }
-                    List<Integer> nextPortList = getNextNodePortList(nodeIdx, new File("node_map.txt"), portList, makeSequence(0,nodeNum-1));
+                    List<Integer> nextPortList = getNextNodePortList(nodeIdx, new File("node_map.txt"), portList, makeSequence(0,nodeNum));
                     PathMessage pathMessage = new PathMessage(kickMessage.getProctype(),
                                                                 kickMessage.getFilename(),
                                                                 kickMessage.getDestnode(),
+                                                                intervalue,
                                                                 new ArrayList<Integer>(Collections.singletonList(nodeIdx))
                                                                 );
                     System.out.println("next ports are: "+nextPortList);
@@ -209,10 +230,54 @@ public class CryptoNode {
                         System.err.println("Expecting path message from the closure");
                         throw new Exception();
                     }
+
                     PathMessage pathMessage = (PathMessage) messageClosure.getObject();
+                    ProcType type = pathMessage.getProctype();
+                    System.out.println("Request is type: "+ type.name());
                     socket.close();
+                    List<Integer> path = pathMessage.getPath();
+                    String intervalue = pathMessage.getIntervalue();
+                    List<Integer> enList = getEncfrg(new File("keyfrg_map.txt"), path, keyFrgList);
+                    System.out.println("these keys needed to be proc: "+ enList);
+
+                    List<Integer> matchedPath = matchPath(new File("node_map.txt"), path);
+                    path.add(nodeIdx);
+                    List<Integer> nextPortList = getNextNodePortList(nodeIdx, new File("node_map.txt"), portList, matchedPath);
+                    System.out.println("Request is type: "+ type.name());
+                    for (int keyfrg : enList){
+                            switch (type){
+                                case ENC:
+                                    RsaKeyEncryption encryptor = new RsaKeyEncryption(keyfrg);
+                                    intervalue = encryptor.interencrypt(intervalue);
+                                    System.out.println("Encryting with key "+keyfrg);
+                                    break;
+                                case DEC:
+                                    RsaKeyDecryption decryptor = new RsaKeyDecryption(keyfrg);
+                                    intervalue = decryptor.interdecrypt(intervalue);
+                                    System.out.println("Decryting with key "+keyfrg);
+                                    break;
+                                default:
+                                    System.err.println("Expecting ENC/DEC");
+                                    throw new Exception();
+                            }
+
+                    }
 
 
+
+                    pathMessage = new PathMessage(pathMessage.getProctype(),
+                            pathMessage.getFilename(),
+                            pathMessage.getDestnode(),
+                            intervalue,
+                            path
+                    );
+                    System.out.println("next ports are: "+nextPortList);
+
+                    if (nextPortList.size() >0 ){
+                        NextProcInvoke(nextPortList,pathMessage);
+                    } else{
+                        System.out.println("Final value is: "+intervalue);
+                    }
 
                 } catch (Exception e) {
                     System.err.println(e.getStackTrace());
