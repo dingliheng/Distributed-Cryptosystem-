@@ -231,7 +231,7 @@ class RsaKeyEncryption {
                 BigInteger cipherText = clearText.modPow(e, n);
                 output = output + cipherText+"\n";
                 byte[] cipherTextData = cipherText.toByteArray();
-                putBytesBlock(cipherTextBlock,cipherTextData);
+                putBytesBlock(cipherTextBlock, cipherTextData);
                 fos.write(cipherTextBlock);
                 line = in.readLine();
             }

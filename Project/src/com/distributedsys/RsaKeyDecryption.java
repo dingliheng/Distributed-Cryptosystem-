@@ -19,13 +19,10 @@ class RsaKeyDecryption {
         String interput;
         RsaKeyDecryption decryptor3 = new RsaKeyDecryption(3);
         interput = decryptor3.initdecrypt("output.txt");  // "initdencrypt" method
-        System.out.println("pppppppppppp "+interput+" pppppppppppp");
         RsaKeyDecryption decryptor5 = new RsaKeyDecryption(5);
         interput = decryptor5.interdecrypt(interput);    // "interdencrypt" method
-        System.out.println("pppppppppppp "+interput+" pppppppppppp");
         RsaKeyDecryption decryptor4 = new RsaKeyDecryption(4);
         interput = decryptor4.interdecrypt(interput);
-        System.out.println("pppppppppppp "+interput+" pppppppppppp");
         RsaKeyDecryption decryptor6 = new RsaKeyDecryption(6);
         interput = decryptor6.interdecrypt(interput);
         RsaKeyDecryption decryptor1 = new RsaKeyDecryption(1);
@@ -35,7 +32,6 @@ class RsaKeyDecryption {
         RsaKeyDecryption decryptor = new RsaKeyDecryption(0);
 //        decryptor.findecrypt(interput, "decrypt.txt");    // "findencrypt" method
         interput =  decryptor.interdecrypt(interput);
-        System.out.println("pppppppppppp "+interput+" pppppppppppp");
         decryptor.finalwritetofile(interput, "decrypt.txt");
         System.out.println("intervalue: "+ interput);
     }
@@ -166,14 +162,10 @@ class RsaKeyDecryption {
             while (k<in.length) {
                 blocks++;
                 BigInteger cipherText = new BigInteger(in[k]);
-                System.out.println(cipherText);
 //                BigInteger clearText = cipherText.modPow(d, n);
                 BigInteger clearText = cipherText;
-                System.out.println(clearText);
                 byte[] clearTextData = clearText.toByteArray();
-                System.out.println(clearTextData.length);
                 padding_bytes = clearTextData[clearTextData.length-1];
-                System.out.println(padding_bytes);
 //                putBytesBlock(clearTextBlock, clearTextData);
                 String str = new String(clearTextData,"utf-8");
                 output = output+str;
@@ -185,7 +177,6 @@ class RsaKeyDecryption {
             output = output.substring(0,output.length()-padding_bytes);
             fos.write(output);
             foss.write(output);
-            System.out.println(output);
             fos.close();
             foss.close();
 //            System.out.println("Decryption block count: "+blocks);
@@ -227,7 +218,6 @@ class RsaKeyDecryption {
             String match = "("+s+")*$";
             output = output.replaceAll(match, "");
             fos.write(output);
-            System.out.println(output);
             in.close();
             fos.close();
             System.out.println("Decryption block count: "+blocks);
