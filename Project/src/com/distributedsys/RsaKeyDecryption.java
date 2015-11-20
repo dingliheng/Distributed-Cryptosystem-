@@ -21,6 +21,7 @@ class RsaKeyDecryption {
         interput = decryptor3.initdecrypt("output.txt");  // "initdencrypt" method
         RsaKeyDecryption decryptor5 = new RsaKeyDecryption(5);
         interput = decryptor5.interdecrypt(interput);    // "interdencrypt" method
+        System.out.println("intervalue: "+ interput);
         RsaKeyDecryption decryptor4 = new RsaKeyDecryption(4);
         interput = decryptor4.interdecrypt(interput);
         RsaKeyDecryption decryptor6 = new RsaKeyDecryption(6);
@@ -33,7 +34,21 @@ class RsaKeyDecryption {
 //        decryptor.findecrypt(interput, "decrypt.txt");    // "findencrypt" method
         interput =  decryptor.interdecrypt(interput);
         decryptor.finalwritetofile(interput, "decrypt.txt");
-        System.out.println("intervalue: "+ interput);
+        System.out.println("intervalue: " + interput);
+
+        try {
+            BufferedReader br=new BufferedReader(new FileReader("initBiginter.txt"));
+            String line="";
+            StringBuffer  buffer = new StringBuffer();
+            while((line=br.readLine())!=null){
+                buffer.append(line+"\n");
+            }
+            String fileContent = buffer.toString();
+            interput = fileContent;
+        }catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        System.out.println("the result of verification :" + decryptor6.verifydecrypt("output.txt", interput));
     }
 
     // Reading in RSA private key
@@ -68,7 +83,7 @@ class RsaKeyDecryption {
         System.out.println("Ciphertext block size: "+cipherTextSize);
         try {
             FileInputStream fis = new FileInputStream(intput);
-//            OutputStreamWriter fos = new OutputStreamWriter(new FileOutputStream(output),"utf-8");
+            OutputStreamWriter fos = new OutputStreamWriter(new FileOutputStream("initBiginter.txt"),"utf-8");
             StringWriter outString = new StringWriter();
             byte[] clearTextBlock = new byte[clearTextSize];
             byte[] cipherTextBlock = new byte[cipherTextSize];
@@ -77,6 +92,7 @@ class RsaKeyDecryption {
             while (fis.read(cipherTextBlock)>0) {
                 blocks++;
                 BigInteger cipherText = new BigInteger(1,cipherTextBlock);
+                fos.write(cipherText.toString() + "\n");
                 BigInteger clearText = cipherText.modPow(d,n);
                 System.out.println(clearText);
 //                byte[] clearTextData = clearText.toByteArray();
@@ -91,7 +107,7 @@ class RsaKeyDecryption {
             }
             fis.close();
             outString.close();
-
+            fos.close();
             System.out.println("Decryption block count: " + blocks);
             return outString.toString().substring(0, outString.toString().length()-1);
         } catch (Exception ex) {
@@ -220,11 +236,45 @@ class RsaKeyDecryption {
             fos.write(output);
             in.close();
             fos.close();
-            System.out.println("Decryption block count: "+blocks);
+            System.out.println("Decryption block count: " + blocks);
             return fos.toString();
         }catch(Exception ex){
             ex.printStackTrace();
             return null;
+        }
+    }
+
+    public boolean verifydecrypt (String inputfile,String interput) {
+        int keySize = n.bitLength();                       // In bits
+        int clearTextSize = Math.min((keySize - 1) / 8, 256);   // In bytes
+        int cipherTextSize = 1 + (keySize-1)/8;            // In bytes
+        String ciphertxt = "";
+        System.out.println("Cleartext block size: "+clearTextSize);
+        System.out.println("Ciphertext block size: "+cipherTextSize);
+        try {
+            FileInputStream fis = new FileInputStream(inputfile);
+            byte[] clearTextBlock = new byte[clearTextSize];
+            byte[] cipherTextBlock = new byte[cipherTextSize];
+            long blocks = 0;
+            int dataSize = 0;
+            while (fis.read(cipherTextBlock)>0) {
+                blocks++;
+                BigInteger cipherText = new BigInteger(1,cipherTextBlock);
+                ciphertxt = ciphertxt + cipherText+"\n";
+                dataSize = clearTextSize;
+                if (fis.available()==0) {
+                    dataSize = getDataSize(clearTextBlock);
+                }
+            }
+            fis.close();
+            System.out.println("The Biginter of original message: "+ciphertxt);
+            if (ciphertxt.equals(interput)){
+                return true;
+            }
+            else return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
         }
     }
 }
