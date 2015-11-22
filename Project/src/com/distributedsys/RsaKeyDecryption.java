@@ -36,18 +36,33 @@ class RsaKeyDecryption {
         decryptor.finalwritetofile(interput, "decrypt.txt");
         System.out.println("intervalue: " + interput);
 
-        try {
-            BufferedReader br=new BufferedReader(new FileReader("initBiginter.txt"));
-            String line="";
-            StringBuffer  buffer = new StringBuffer();
-            while((line=br.readLine())!=null){
-                buffer.append(line+"\n");
-            }
-            String fileContent = buffer.toString();
-            interput = fileContent;
-        }catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        RsaKeyEncryption encryptor6 = new RsaKeyEncryption(0); //create an encryptor which uses publick key6
+        interput = encryptor6.interencrypt(interput); //the first encryption uses the "initencrypt" method
+        RsaKeyEncryption encryptor1 = new RsaKeyEncryption(5);
+        interput =encryptor1.interencrypt(interput);  //the intermediate encryptions use the "interencrypt" method
+        RsaKeyEncryption encryptor2 = new RsaKeyEncryption(6);
+        interput =encryptor2.interencrypt(interput);
+        RsaKeyEncryption encryptor3 = new RsaKeyEncryption(1);
+        interput =encryptor3.interencrypt(interput);
+        RsaKeyEncryption encryptor4 = new RsaKeyEncryption(2);
+        interput =encryptor4.interencrypt(interput);
+        RsaKeyEncryption encryptor5 = new RsaKeyEncryption(3);
+        interput =encryptor5.interencrypt(interput);
+        RsaKeyEncryption encryptor0 = new RsaKeyEncryption(4);
+        interput =encryptor0.interencrypt(interput);
+
+//        try {
+//            BufferedReader br=new BufferedReader(new FileReader("initBiginter.txt"));
+//            String line="";
+//            StringBuffer  buffer = new StringBuffer();
+//            while((line=br.readLine())!=null){
+//                buffer.append(line+"\n");
+//            }
+//            String fileContent = buffer.toString();
+//            interput = fileContent;
+//        }catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
         System.out.println("the result of verification :" + decryptor6.verifydecrypt("output.txt", interput));
     }
 

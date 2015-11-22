@@ -32,21 +32,41 @@ class RsaKeyEncryption {
 //        encryptor0.finencrypt(interput, "output.txt"); //the final encryption uses the "finercrypt" method
         interput =encryptor0.interencrypt(interput);
 
+        RsaKeyDecryption decryptor3 = new RsaKeyDecryption(3);
+        interput = decryptor3.interdecrypt(interput);  // "initdencrypt" method
+        RsaKeyDecryption decryptor5 = new RsaKeyDecryption(5);
+        interput = decryptor5.interdecrypt(interput);    // "interdencrypt" method
+//        System.out.println("intervalue: "+ interput);
+        RsaKeyDecryption decryptor4 = new RsaKeyDecryption(4);
+        interput = decryptor4.interdecrypt(interput);
+        RsaKeyDecryption decryptor6 = new RsaKeyDecryption(6);
+        interput = decryptor6.interdecrypt(interput);
+        RsaKeyDecryption decryptor1 = new RsaKeyDecryption(1);
+        interput = decryptor1.interdecrypt(interput);
+        RsaKeyDecryption decryptor2 = new RsaKeyDecryption(2);
+        interput =  decryptor2.interdecrypt(interput);
+        RsaKeyDecryption decryptor = new RsaKeyDecryption(0);
+//        decryptor.findecrypt(interput, "decrypt.txt");    // "findencrypt" method
+        interput =  decryptor.interdecrypt(interput);
+
         RsaKeyEncryption encryptor11 = new RsaKeyEncryption(0);
         encryptor11.finalwritetofile(interput,"output.txt");
 
-        try {
-            BufferedReader br=new BufferedReader(new FileReader("initBiginter.txt"));
-            String line="";
-            StringBuffer  buffer = new StringBuffer();
-            while((line=br.readLine())!=null){
-                buffer.append(line+"\n");
-            }
-            String fileContent = buffer.toString();
-            interput = fileContent;
-        }catch (Exception ex) {
-            ex.printStackTrace();
-        }
+
+
+
+//        try {
+//            BufferedReader br=new BufferedReader(new FileReader("initBiginter.txt"));
+//            String line="";
+//            StringBuffer  buffer = new StringBuffer();
+//            while((line=br.readLine())!=null){
+//                buffer.append(line+"\n");
+//            }
+//            String fileContent = buffer.toString();
+//            interput = fileContent;
+//        }catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
         System.out.println("the result of verification :" + encryptor6.verifyencrypt("input.txt", interput));
     }
 

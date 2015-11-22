@@ -241,14 +241,15 @@ public class CryptoNode {
 
                     List<Integer> pathfrg = getpathfrg(new File("keyfrg_map.txt"), path);
                     String checkdata = new String(intervalue);
+                    System.out.println("rechecking keys: "+pathfrg);
                     for (int keyfrg : pathfrg){
                         switch (type){
-                            case ENC:
+                            case DEC:
                                 RsaKeyEncryption encryptor = new RsaKeyEncryption(keyfrg);
                                 checkdata = encryptor.interencrypt(checkdata);
 //                                System.out.println("Encryting with key "+keyfrg);
                                 break;
-                            case DEC:
+                            case ENC:
                                 RsaKeyDecryption decryptor = new RsaKeyDecryption(keyfrg);
                                 checkdata = decryptor.interdecrypt(checkdata);
 //                                System.out.println("Decryting with key "+keyfrg);
