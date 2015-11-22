@@ -243,12 +243,12 @@ public class CryptoNode {
                     String checkdata = new String(intervalue);
                     for (int keyfrg : pathfrg){
                         switch (type){
-                            case DEC:
+                            case ENC:
                                 RsaKeyEncryption encryptor = new RsaKeyEncryption(keyfrg);
                                 checkdata = encryptor.interencrypt(checkdata);
 //                                System.out.println("Encryting with key "+keyfrg);
                                 break;
-                            case ENC:
+                            case DEC:
                                 RsaKeyDecryption decryptor = new RsaKeyDecryption(keyfrg);
                                 checkdata = decryptor.interdecrypt(checkdata);
 //                                System.out.println("Decryting with key "+keyfrg);
@@ -258,7 +258,20 @@ public class CryptoNode {
                                 throw new Exception();
                         }
                     }
-
+                    boolean valid_data=true;
+                    switch (type){
+                        case ENC:
+                            RsaKeyEncryption encryptor = new RsaKeyEncryption(0);
+                            valid_data = encryptor.verifyencrypt(pathMessage.getFilename(), checkdata);
+                            break;
+                        case DEC:
+                            RsaKeyDecryption decryptor = new RsaKeyDecryption(0);
+                            valid_data = decryptor.verifydecrypt(pathMessage.getFilename(), checkdata);
+                            break;
+                    }
+                    if (!valid_data){
+                        System.err.println("path: "+ pathMessage.toString()+" has wrong data");
+                    }
 
 
 
