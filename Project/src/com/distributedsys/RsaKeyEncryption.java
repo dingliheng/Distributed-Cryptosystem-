@@ -306,6 +306,7 @@ class RsaKeyEncryption {
                 cleartxt = cleartxt + clearText.toString()+"\n";
             }
             fis.close();
+			cleartxt = cleartxt.substring(0,cleartxt.length()-1);
             System.out.println("The Biginter of original message: "+cleartxt);
             if (cleartxt.equals(interput)){
                 return true;
